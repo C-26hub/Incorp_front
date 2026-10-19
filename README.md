@@ -165,4 +165,4 @@ Antes de executar `git add .`, revise o `git status` e certifique-se de não inc
 
 ---
 
-**Incorp AI** — Projeto em evolução, desenvolvido colaborativamente.
+**Incorp AI** — Projeto em evolução, desenvolvido por estudantes para fins acadêmicos
