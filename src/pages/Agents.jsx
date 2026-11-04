@@ -1,145 +1,124 @@
-import { useState } from 'react'
-import { Search, ArrowRight } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { Search, Star } from 'lucide-react'
 import { agents } from '../data/agents'
-import Avatar from '../components/Avatar'
-import StatusBadge from '../components/StatusBadge'
-import { useNavigate } from 'react-router-dom'
+import AgentCard from '../components/AgentCard'
+import { useFavorites } from '../context/FavoritesContext'
+
+const FILTERS = [
+  { key: 'todos', label: 'Todos' },
+  { key: 'marketing', label: 'Marketing' },
+  { key: 'comercial', label: 'Comercial' },
+  { key: 'favoritos', label: 'Favoritos', icon: true },
+]
 
 export default function Agents() {
-  const [tab, setTab] = useState('Todos')
-  const [q, setQ] = useState('')
-  const [status, setStatus] = useState('Todos os status')
-  const navigate = useNavigate()
+  const [params, setParams] = useSearchParams()
+  const filter = params.get('filtro') ?? 'todos'
+  const [query, setQuery] = useState('')
+  const [status, setStatus] = useState('todos')
+  const { favorites } = useFavorites()
 
-  const filtered = agents.filter(
-    (a) =>
-      (tab === 'Todos' || a.dept === tab) &&
-      (status === 'Todos os status' || a.status === status) &&
-      [a.name, a.category, a.desc, a.dept]
-  .some((value) =>
-    value.toLowerCase().includes(q.trim().toLowerCase())
-  )
-  )
+  const setFilter = (key) => setParams(key === 'todos' ? {} : { filtro: key })
 
-  const depts = ['Marketing', 'Comercial'].filter((d) => filtered.some((a) => a.dept === d))
+  const visible = useMemo(() => agents.filter((a) => {
+    if (filter === 'marketing' && a.department !== 'Marketing') return false
+    if (filter === 'comercial' && a.department !== 'Comercial') return false
+    if (filter === 'favoritos' && !favorites.includes(a.id)) return false
+    if (status !== 'todos' && a.status !== status) return false
+    if (query && !`${a.name} ${a.description}`.toLowerCase().includes(query.toLowerCase())) return false
+    return true
+  }), [filter, status, query, favorites])
+
+  // agrupa: departamento -> categoria
+  const grouped = useMemo(() => {
+    const out = {}
+    visible.forEach((a) => {
+      out[a.department] ??= {}
+      out[a.department][a.category] ??= []
+      out[a.department][a.category].push(a)
+    })
+    return out
+  }, [visible])
+
+  const departments = ['Marketing', 'Comercial'].filter((d) => grouped[d])
 
   return (
     <div>
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-[28px] font-medium">Exploração de Agentes</h1>
-          <p className="text-sm text-muted mt-1">10 agentes disponíveis em 2 departamentos</p>
+          <h1 className="text-2xl font-medium text-slate-800">Exploração de Agentes</h1>
+          <p className="mt-1 text-xs text-sky-600">
+            {agents.length} agentes disponíveis em 2 departamentos
+          </p>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-  <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+        <div className="flex gap-3">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar agente..."
-              className="h-10 w-full sm:w-[200px] pl-9 pr-3 rounded-lg bg-white border border-line text-[13px] outline-none focus:border-brand"
+              className="w-52 rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-3 text-xs outline-none focus:border-indigo-400"
             />
           </div>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="h-10 px-3 rounded-lg bg-white border border-line text-[13px] outline-none"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
           >
-            <option>Todos os status</option>
-            <option>Online</option>
-            <option>Beta</option>
+            <option value="todos">Todos os status</option>
+            <option value="Online">Online</option>
+            <option value="Beta">Beta</option>
           </select>
         </div>
       </div>
 
-      <div className="flex gap-2 mt-6">
-        {['Todos', 'Marketing', 'Comercial'].map((t) => (
+      <div className="mt-5 flex gap-2">
+        {FILTERS.map((f) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 h-9 rounded-lg text-[13px] font-medium border transition-colors ${
-              tab === t ? 'bg-brand text-white border-brand' : 'bg-white text-ink border-line hover:border-brand'
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`flex items-center gap-1.5 rounded-lg border px-4 py-1.5 text-xs font-medium transition ${
+              filter === f.key
+                ? 'border-indigo-900 bg-indigo-900 text-white'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
             }`}
           >
-            {t}
+            {f.icon && <Star size={12} className={filter === f.key ? 'fill-white' : ''} />}
+            {f.label}
           </button>
         ))}
       </div>
-      {filtered.length === 0 && (
-  <div className="mt-10 rounded-2xl border border-line bg-white p-8 text-center">
-    <Search size={28} className="mx-auto mb-3 text-muted" />
 
-    <h3 className="font-semibold text-ink">
-      Nenhum agente encontrado
-    </h3>
+      {departments.length === 0 && (
+        <p className="mt-16 text-center text-sm text-slate-400">
+          {filter === 'favoritos'
+            ? 'Você ainda não favoritou nenhum agente. Clique na estrela de um card para adicionar.'
+            : 'Nenhum agente encontrado.'}
+        </p>
+      )}
 
-    <p className="mt-2 text-sm text-muted">
-      Tente outro termo ou altere os filtros.
-    </p>
+      {departments.map((dep) => (
+        <section key={dep} className="mt-8">
+          <h2 className="flex items-center gap-2 text-sm font-medium text-slate-800">
+            <span className={`h-2 w-2 rounded-full ${dep === 'Marketing' ? 'bg-sky-500' : 'bg-indigo-800'}`} />
+            {dep}
+            <span className="text-xs font-normal text-slate-400">
+              {Object.values(grouped[dep]).flat().length} agentes
+            </span>
+          </h2>
 
-    <button
-      type="button"
-      onClick={() => {
-        setQ('')
-        setTab('Todos')
-        setStatus('Todos os status')
-      }}
-      className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white"
-    >
-      Limpar filtros
-    </button>
-  </div>
-)}
-
-      {depts.map((dept) => {
-        const list = filtered.filter((a) => a.dept === dept)
-        const cats = [...new Set(list.map((a) => a.category))]
-        return (
-          <section key={dept} className="mt-8">
-            <div className="flex items-center gap-3">
-              <span className={`w-2.5 h-2.5 rounded-full ${dept === 'Marketing' ? 'bg-accent' : 'bg-brand'}`} />
-              <h2 className="text-base font-medium">{dept}</h2>
-              <span className="text-xs text-muted">{list.length} agentes</span>
-            </div>
-
-            {cats.map((cat) => (
-              <div key={cat} className="mt-5">
-                <p className="text-[11px] font-semibold tracking-widest text-muted uppercase mb-3">{cat}</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {list.filter((a) => a.category === cat).map((a) => (
-                    <div
-  key={a.id}
-  role="button"
-  tabIndex={0}
-  onClick={() => navigate(`/agentes/${a.id}`)}
-  onKeyDown={(event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      navigate(`/agentes/${a.id}`)
-    }
-  }}
-  className="group cursor-pointer bg-white border border-line rounded-2xl p-5 hover:border-brand-soft hover:shadow-md transition focus:outline-none focus:ring-2 focus:ring-brand"
->
-                      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                        <Avatar initials={a.initials} dept={a.dept} size="lg" />
-                        <StatusBadge status={a.status} />
-                      </div>
-                      <p className="text-[15px] font-medium mt-4">{a.name}</p>
-                      <p className="text-xs text-muted mt-1.5 leading-relaxed min-h-[36px]">{a.desc}</p>
-                      <div className="flex items-center justify-between mt-4">
-                        <span className="font-mono text-[11px] text-muted">{a.uses} usos</span>
-                        <span className="text-xs font-medium text-brand opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1">
-                          Usar agente <ArrowRight size={12} />
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          {Object.entries(grouped[dep]).map(([cat, list]) => (
+            <div key={cat} className="mt-4">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{cat}</p>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {list.map((a) => <AgentCard key={a.id} agent={a} />)}
               </div>
-            ))}
-          </section>
-        )
-      })}
+            </div>
+          ))}
+        </section>
+      ))}
     </div>
   )
 }

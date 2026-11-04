@@ -6,9 +6,9 @@ export const agents = [
   { id: 'campaign', initials: 'CA', name: 'Campaign Insights', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', uses: 451, fav: false, desc: 'Análise de performance de campanhas e geração de insights acionáveis.' },
   { id: 'proposal', initials: 'PR', name: 'Proposal Builder', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 973, fav: true, desc: 'Criação automática de propostas comerciais personalizadas por cliente.' },
   { id: 'lead', initials: 'LE', name: 'Lead Qualifier', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 756, fav: true, desc: 'Qualificação automática de leads com base em critérios de ICP.' },
-  { id: 'pricing', initials: 'PR', name: 'Pricing Assistant', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 534, fav: false, desc: 'Sugestão de preços e descontos com base no perfil do cliente.' },
-  { id: 'followup', initials: 'FO', name: 'Follow-up Engine', dept: 'Comercial', category: 'Relacionamento', status: 'Online', uses: 402, fav: false, desc: 'Sequências de follow-up para oportunidades em aberto.' },
-  { id: 'forecast', initials: 'SF', name: 'Sales Forecast', dept: 'Comercial', category: 'Relacionamento', status: 'Online', uses: 318, fav: false, desc: 'Previsão de receita e análise do pipeline comercial.' },
+  { id: 'pricing', initials: 'PR', name: 'Pricing Assistant', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 534, fav: false, desc: 'Sugestões de precificação com base em margem, concorrência e histórico.' },
+  { id: 'followup', initials: 'FO', name: 'Follow-up Engine', dept: 'Comercial', category: 'Relacionamento', status: 'Beta', uses: 312, fav: false, desc: 'Sugestão e automação de sequências de follow-up para oportunidades abertas.' },
+  { id: 'contract', initials: 'CO', name: 'Contract Reviewer', dept: 'Comercial', category: 'Jurídico & Contratos', status: 'Online', uses: 198, fav: false, desc: 'Revisão de contratos comerciais com alertas de cláusulas sensíveis.' },
 ]
 
 export const history = [

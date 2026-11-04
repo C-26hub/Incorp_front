@@ -1,4 +1,3 @@
-
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -87,6 +86,7 @@ export default function Cadastro() {
     // Apenas validação demonstrativa.
     // Nenhuma conta é criada e nenhum dado é enviado.
     setSucesso(true);
+    setTimeout(() => navigate("/login"), 1500);
   }
 
   return (
@@ -192,8 +192,8 @@ export default function Cadastro() {
 
                 {sucesso && (
                   <div role="status" className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-3 text-[12px] text-[#3D3F94]">
-                    Dados validados! O cadastro será concluído quando
-                    integrarmos o servidor.
+                    Dados validados! O cadastro real será concluído quando
+                    integrarmos o servidor. Redirecionando para o login…
                   </div>
                 )}
 
@@ -201,7 +201,7 @@ export default function Cadastro() {
                   type="submit"
                   className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#3D3F94] text-[14px] font-semibold text-white hover:bg-[#2E3078]"
                 >
-                  Validar cadastro
+                  Criar conta
                   <ArrowRight size={16} />
                 </button>
               </form>

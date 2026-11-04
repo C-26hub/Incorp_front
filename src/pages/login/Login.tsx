@@ -1,4 +1,3 @@
-
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -39,7 +38,9 @@ export default function Login() {
     }
 
     // Demonstração: sem autenticação real.
-    navigate("/", { replace: true });
+    // Marca o usuário como "logado" para liberar as rotas internas (ProtectedRoute).
+    localStorage.setItem("incorp:auth", "true");
+    navigate("/home", { replace: true });
   }
 
   return (
@@ -252,19 +253,17 @@ export default function Login() {
                 Entrar com Google
               </button>
 
-            
-{/* CADASTRO */}
-<p className="mt-6 text-center text-[12.5px] text-[#6B7080]">
-  Ainda não possui uma conta?{" "}
-  <button
-    type="button"
-    onClick={() => navigate("/cadastro")}
-    className="font-semibold text-[#3D3F94] hover:text-[#00AFEE]"
-  >
-    Cadastre-se
-  </button>
-</p>
-
+              {/* CADASTRO */}
+              <p className="mt-6 text-center text-[12.5px] text-[#6B7080]">
+                Ainda não possui uma conta?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/cadastro")}
+                  className="font-semibold text-[#3D3F94] hover:text-[#00AFEE]"
+                >
+                  Cadastre-se
+                </button>
+              </p>
 
               {/* RODAPÉ */}
               <p className="mt-8 text-center text-[11.5px] leading-5 text-[#9DA3B4]">

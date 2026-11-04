@@ -1,169 +1,155 @@
-
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Send, Bot, RotateCcw } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useParams, Navigate } from 'react-router-dom'
+import { Plus, MessageSquare, Clock, ArrowLeft, Send, RotateCcw, Save, Download } from 'lucide-react'
 import { agents } from '../data/agents'
 
+const SUGGESTIONS = ['Criar e-mail de campanha', 'Gerar post para LinkedIn', 'Texto para landing page']
+
+const now = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+
+// TODO: substituir pela chamada ao back-end
+const fakeReply = (agent) =>
+  new Promise((res) => setTimeout(() => res(`Resposta de demonstração do ${agent.name}. A integração com o modelo de IA será feita em uma etapa posterior.`), 700))
+
 export default function Workspace() {
-  const { agentId } = useParams()
-  const navigate = useNavigate()
-
-  const agent = agents.find((item) => item.id === agentId)
-
+  const { id } = useParams()
+  const agent = agents.find((a) => a.id === id)
   const [messages, setMessages] = useState([])
-  const [message, setMessage] = useState('')
+  const [text, setText] = useState('')
+  const [loading, setLoading] = useState(false)
+  const endRef = useRef(null)
 
-  if (!agent) {
-    return (
-      <div className="rounded-2xl bg-white p-8 text-center">
-        <h1 className="text-xl font-semibold">
-          Agente não encontrado
-        </h1>
+  useEffect(() => {
+    if (!agent) return
+    setMessages([{
+      role: 'agent', time: now(),
+      text: `Olá! Sou o ${agent.name}, especializado em ${agent.category} para o departamento de ${agent.dept}. ${agent.desc} Como posso te ajudar hoje?`,
+    }])
+  }, [agent?.id])
 
-        <button
-          onClick={() => navigate('/agentes')}
-          className="mt-4 rounded-lg bg-brand px-4 py-2 text-white"
-        >
-          Voltar aos agentes
-        </button>
-      </div>
-    )
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
+
+  if (!agent) return <Navigate to="/agentes" replace />
+
+  const send = async (content = text) => {
+    const value = content.trim()
+    if (!value || loading) return
+    setMessages((m) => [...m, { role: 'user', text: value, time: now() }])
+    setText('')
+    setLoading(true)
+    const reply = await fakeReply(agent)
+    setMessages((m) => [...m, { role: 'agent', text: reply, time: now() }])
+    setLoading(false)
   }
 
-  function sendMessage(event) {
-    event.preventDefault()
-
-    const content = message.trim()
-
-    if (!content) return
-
-    const userMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content,
-    }
-
-    const demoResponse = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content:
-        `Esta é uma demonstração do agente ${agent.name}. ` +
-        'A integração com a inteligência artificial será realizada posteriormente.',
-    }
-
-    setMessages((current) => [
-      ...current,
-      userMessage,
-      demoResponse,
-    ])
-
-    setMessage('')
+  const onKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   }
+
+  // conversas anteriores: troque pelos dados de History quando existirem
+  const previous = [
+    { title: 'Proposta para Grupo Renova...', meta: 'Proposal Builder · 13 de set.' },
+    { title: 'E-mail marketing campanha Se...', meta: 'CopyWriter Pro · 15 de set.' },
+    { title: 'Qualificação lote 24 leads — Li...', meta: 'Lead Qualifier · 14 de set.' },
+  ]
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-5">
-      <button
-        onClick={() => navigate('/agentes')}
-        className="flex items-center gap-2 self-start text-sm text-muted hover:text-brand"
-      >
-        <ArrowLeft size={16} />
-        Voltar aos agentes
-      </button>
+    <div className="flex h-[calc(100vh-4rem)] bg-slate-50">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-white p-3 md:flex">
+        <button
+          onClick={() => setMessages((m) => m.slice(0, 1))}
+          className="flex items-center justify-center gap-2 rounded-lg bg-indigo-900 py-2.5 text-xs font-medium text-white hover:bg-indigo-800"
+        >
+          <Plus size={14} /> Nova conversa
+        </button>
 
-      <div className="rounded-2xl border border-line bg-white p-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand text-white">
-            <Bot size={24} />
-          </div>
-
+        <p className="mt-6 mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Conversa atual</p>
+        <div className="flex items-center gap-2 rounded-lg border border-slate-200 p-2.5">
+          <MessageSquare size={14} className="text-indigo-800" />
           <div>
-            <h1 className="text-xl font-semibold">{agent.name}</h1>
-            <p className="text-sm text-muted">
-              {agent.dept} • {agent.category}
-            </p>
+            <p className="text-xs font-medium text-slate-800">{agent.name}</p>
+            <p className="text-[10px] text-slate-400">Conversa em andamento</p>
           </div>
         </div>
 
-        <p className="mt-4 text-sm text-muted">
-          {agent.desc}
-        </p>
-
-        <p className="mt-3 text-xs text-muted">
-          Ambiente demonstrativo — sem conexão com IA real.
-        </p>
-      </div>
-
-      <div className="flex min-h-[450px] flex-col rounded-2xl border border-line bg-white">
-        <div className="flex items-center justify-between border-b border-line p-4">
-          <h2 className="font-medium">Conversa</h2>
-
-          <button
-            type="button"
-            onClick={() => setMessages([])}
-            className="flex items-center gap-2 text-sm text-muted hover:text-brand"
-          >
-            <RotateCcw size={15} />
-            Nova conversa
-          </button>
-        </div>
-
-        <div
-          className="flex flex-1 flex-col gap-4 p-5"
-          aria-live="polite"
-        >
-          {messages.length === 0 ? (
-            <div className="m-auto text-center">
-              <Bot
-                size={36}
-                className="mx-auto mb-3 text-brand"
-              />
-
-              <h3 className="font-medium">
-                Como posso ajudar?
-              </h3>
-
-              <p className="mt-2 text-sm text-muted">
-                Digite uma mensagem para testar a interface.
-              </p>
-            </div>
-          ) : (
-            messages.map((item) => (
-              <div
-                key={item.id}
-                className={`max-w-[85%] rounded-xl p-4 text-sm ${
-                  item.role === 'user'
-                    ? 'self-end bg-brand text-white'
-                    : 'self-start bg-slate-100 text-ink'
-                }`}
-              >
-                {item.content}
+        <p className="mt-6 mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Conversas anteriores</p>
+        <ul className="flex-1 space-y-1 overflow-y-auto">
+          {previous.map((c) => (
+            <li key={c.title} className="flex gap-2 rounded-lg p-2 hover:bg-slate-50">
+              <Clock size={13} className="mt-0.5 shrink-0 text-slate-400" />
+              <div className="min-w-0">
+                <p className="truncate text-xs text-slate-700">{c.title}</p>
+                <p className="text-[10px] text-slate-400">{c.meta}</p>
               </div>
-            ))
-          )}
+            </li>
+          ))}
+        </ul>
+
+        <Link to="/agentes" className="mt-2 flex items-center gap-2 border-t border-slate-100 pt-3 text-xs text-slate-500 hover:text-slate-800">
+          <ArrowLeft size={13} /> Voltar para agentes
+        </Link>
+      </aside>
+
+      <section className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-xs font-semibold text-sky-700">{agent.initials}</span>
+            <div>
+              <p className="text-sm font-medium text-slate-800">{agent.name}</p>
+              <p className="text-[11px] text-slate-400">{agent.dept} · {agent.category}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-slate-500">
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600">● {agent.status}</span>
+            <button className="flex items-center gap-1 hover:text-slate-800"><Save size={13} /> Salvar</button>
+            <button className="flex items-center gap-1 hover:text-slate-800"><Download size={13} /> Exportar</button>
+          </div>
+        </header>
+
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-6">
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-xl rounded-xl px-4 py-3 text-sm shadow-sm ${
+                m.role === 'user' ? 'bg-indigo-900 text-white' : 'border border-slate-200 bg-white text-slate-700'
+              }`}>
+                <p className="whitespace-pre-wrap">{m.text}</p>
+                <p className={`mt-1 text-[10px] ${m.role === 'user' ? 'text-indigo-200' : 'text-slate-400'}`}>{m.time}</p>
+              </div>
+            </div>
+          ))}
+          {loading && <p className="text-xs text-slate-400">{agent.name} está digitando…</p>}
+          <div ref={endRef} />
         </div>
 
-        <form
-          onSubmit={sendMessage}
-          className="flex gap-3 border-t border-line p-4"
-        >
-          <input
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            placeholder="Digite sua mensagem..."
-            aria-label="Mensagem para o agente"
-            className="min-w-0 flex-1 rounded-lg border border-line px-4 py-3 text-sm outline-none focus:border-brand"
-          />
-
-          <button
-            type="submit"
-            disabled={!message.trim()}
-            className="flex items-center gap-2 rounded-lg bg-brand px-4 py-3 text-sm font-medium text-white disabled:opacity-50"
-          >
-            <Send size={16} />
-            <span className="hidden sm:inline">Enviar</span>
-          </button>
-        </form>
-      </div>
+        <footer className="border-t border-slate-200 bg-white px-6 py-4">
+          <div className="mb-3 flex flex-wrap gap-2">
+            {SUGGESTIONS.map((s) => (
+              <button key={s} onClick={() => send(s)}
+                className="rounded-md border border-indigo-200 bg-indigo-50/50 px-3 py-1 text-[11px] text-indigo-800 hover:bg-indigo-50">
+                {s}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder={`Mensagem para ${agent.name}...`}
+              className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-400"
+            />
+            <button onClick={() => setMessages((m) => m.slice(0, 1))} aria-label="Reiniciar"
+              className="rounded-lg border border-slate-200 p-2.5 text-slate-500 hover:bg-slate-50">
+              <RotateCcw size={15} />
+            </button>
+            <button onClick={() => send()} disabled={!text.trim() || loading} aria-label="Enviar"
+              className="rounded-lg bg-indigo-900 p-2.5 text-white disabled:bg-indigo-300">
+              <Send size={15} />
+            </button>
+          </div>
+          <p className="mt-1.5 text-[10px] text-slate-400">Enter para enviar · Shift+Enter para nova linha</p>
+        </footer>
+      </section>
     </div>
   )
 }
