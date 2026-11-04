@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Search, Phone, Activity } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { agents } from '../data/agents'
 import Avatar from '../components/Avatar'
 import StatusBadge from '../components/StatusBadge'
+import { useProfile } from '../context/ProfileContext'
 
 function greeting() {
   const h = new Date().getHours()
@@ -19,20 +21,35 @@ const departments = [
 ]
 
 export default function Home() {
+  const { profile } = useProfile()
+  const firstName = profile.name.trim().split(/\s+/)[0]
+
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+
+  const onSearch = (event) => {
+    event.preventDefault()
+    const q = search.trim()
+    navigate(q ? `/agentes?busca=${encodeURIComponent(q)}` : '/agentes')
+  }
+
   return (
     <div>
-      <h1 className="text-[28px] font-medium">{greeting()}, Ana 👋</h1>
+      <h1 className="text-[28px] font-medium">{greeting()}, {firstName} 👋</h1>
       <p className="text-sm text-muted mt-1">O que você quer automatizar hoje?</p>
 
-      <div className="relative mt-8">
+      <form onSubmit={onSearch} role="search" className="relative mt-8">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
         <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar agentes, funções ou departamentos..."
+          aria-label="Buscar agentes"
           className="w-full h-[52px] pl-11 pr-4 rounded-xl bg-white border border-line shadow-sm text-sm outline-none focus:border-brand"
         />
-      </div>
+      </form>
 
-      <div className="grid grid-cols-2 gap-5 mt-8">
+      <div className="grid grid-cols-1 gap-5 mt-8 sm:grid-cols-2">
         {departments.map(({ name, to, icon: Icon, bg }) => (
           <Link
             key={name}

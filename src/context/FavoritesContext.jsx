@@ -1,24 +1,33 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { agents } from '../data/agents' 
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { agents } from '../data/agents'
+
+// Chave nova (v2): ignora a lista vazia que a versão anterior pode ter salvo.
+const KEY = 'incorp:favorites:v2'
 
 const FavoritesContext = createContext(null)
-const KEY = 'incorp:favorites'
 
 export function FavoritesProvider({ children }) {
   const [favorites, setFavorites] = useState(() => {
-  try {
-    const saved = JSON.parse(localStorage.getItem(KEY))
-    if (Array.isArray(saved)) return saved
-  } catch {}
-  return agents.filter((a) => a.fav).map((a) => a.id)
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY))
+      if (Array.isArray(saved)) return saved
+    } catch {
+      /* ignora dados corrompidos */
+    }
+    // primeira vez: começa com os agentes marcados com fav: true em data/agents
+    return agents.filter((a) => a.fav).map((a) => a.id)
   })
 
   useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify(favorites))
+    try {
+      localStorage.setItem(KEY, JSON.stringify(favorites))
+    } catch {
+      /* armazenamento bloqueado: os favoritos valem só nesta sessão */
+    }
   }, [favorites])
 
   const toggleFavorite = useCallback((id) => {
-    setFavorites((prev) => prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id])
+    setFavorites((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]))
   }, [])
 
   const isFavorite = useCallback((id) => favorites.includes(id), [favorites])
@@ -30,4 +39,8 @@ export function FavoritesProvider({ children }) {
   )
 }
 
-export const useFavorites = () => useContext(FavoritesContext)
+export function useFavorites() {
+  const ctx = useContext(FavoritesContext)
+  if (!ctx) throw new Error('useFavorites deve ser usado dentro de <FavoritesProvider>')
+  return ctx
+}
