@@ -5,13 +5,13 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-frontend-3178c6)
 ![Vite](https://img.shields.io/badge/Vite-build-646cff)
 
-Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O frontend integra autenticação, cadastro, histórico e o agente de produção de conteúdo à API Spring Boot.
+Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O frontend integra autenticação, cadastro, histórico, produção de conteúdo e qualificação de leads à API Spring Boot.
 
-> **Estado atual:** apenas o Agente de Produção de Conteúdo está conectado ao backend. Os demais itens do catálogo são exibidos como “Em breve” e não aceitam interação.
+> **Estado atual:** os agentes de Produção de Conteúdo e de Prospecção e Qualificação de Leads estão conectados ao backend. Os outros seis itens do catálogo são exibidos como “Em breve”.
 
 ## Visão geral
 
-A plataforma reúne agentes especializados em uma interface única, permitindo que usuários encontrem ferramentas por departamento, categoria e status. A proposta é evoluir para uma solução com autenticação, conversas, histórico e integração segura com APIs.
+A plataforma reúne agentes especializados em uma interface única, permitindo que usuários encontrem ferramentas por departamento, categoria e status, com autenticação e integração segura com a API.
 
 ### Telas existentes
 
@@ -20,17 +20,20 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 | Login | Autenticação na API e consulta do usuário atual | Integrado; sessão em cookies HttpOnly |
 | Cadastro | Criação de conta na API | Integrado |
 | Home | Visão inicial e acesso às funcionalidades | Implementada no Front-end |
-| Agentes | Catálogo com pesquisa e filtros | Um agente integrado; demais indisponíveis |
+| Agentes | Catálogo com pesquisa e filtros | Dois agentes integrados; demais indisponíveis |
 | Histórico | Conversas do agente de conteúdo | Integrado ao backend |
 | Configurações | Preferências de interface | Armazenamento local no navegador |
-| Workspace | Geração e continuação de conteúdo | Integrado; revisão humana necessária |
+| Workspace de conteúdo | Geração e continuação de conteúdo | Integrado; revisão humana necessária |
+| Prospecção e qualificação | Cadastro manual, importação CSV e análise de leads | Integrado; usa ICP informado pelo usuário e não contata leads |
+
+O CSV aceita separador por vírgula ou ponto e vírgula, até 100 registros por arquivo e cabeçalhos em português ou inglês. A coluna de nome é obrigatória; por exemplo: `nome,empresa,cargo,email,setor,porte,localizacao,observacoes`. A qualificação envia ao Gemini o ICP e os dados de empresa, cargo, setor, porte, localização e observações; nome e dados de contato não são enviados.
 
 ## Catálogo de agentes
 
 O catálogo apresenta os oito agentes priorizados para o projeto:
 
 1. Produção de Conteúdo — disponível
-2. Prospecção e Qualificação de Leads — em breve
+2. Prospecção e Qualificação de Leads — disponível
 3. SEO — em breve
 4. Mídias Sociais — em breve
 5. Relatórios e KPIs — em breve
@@ -117,25 +120,25 @@ Incorp_front/
 
 A aplicação utiliza a identidade **Incorp AI**, com logomarca própria, tons de violeta e azul e interface adaptável a diferentes tamanhos de tela. O favicon usa a logomarca do projeto, quando o arquivo `public/favicon.png` está presente.
 
-## Arquitetura e integração futura
+## Arquitetura e integração
 
 ```text
 Usuário
    ↓
 Front-end (React + TypeScript)
    ↓  HTTPS / API
-Back-end (a definir com a equipe responsável)
+Back-end (Spring Boot)
    ↓
 Serviços de IA e banco de dados
 ```
 
-O Front-end será responsável por coletar as entradas do usuário e apresentar os resultados. O Back-end deverá validar permissões, gerenciar sessões, proteger credenciais, registrar conversas e acessar os provedores de IA.
+O Front-end coleta as entradas do usuário e apresenta os resultados. O Back-end valida permissões, gerencia sessões, protege credenciais, persiste os leads por usuário e acessa o provedor de IA.
 
 **Segurança:** o frontend envia cookies com `credentials: 'include'`, obtém o token CSRF do backend e não persiste JWTs em JavaScript ou no `localStorage`. O backend controla a autenticação e autorização. Em desenvolvimento local, o proxy do Vite evita requisições cross-origin; em ambientes publicados, configure HTTPS, CORS e atributos de cookie no backend.
 
 ## Próximas etapas
 
-1. Adicionar endpoints backend para os outros sete agentes.
+1. Adicionar endpoints backend para os outros seis agentes.
 2. Implementar recuperação de senha e edição de dados da conta no backend.
 3. Ampliar testes de integração e acessibilidade.
 

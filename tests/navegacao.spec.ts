@@ -11,6 +11,7 @@ const authenticatedUser = {
 test.beforeEach(async ({ page }) => {
   const conversations = []
   const transcripts = new Map()
+  const leads = []
 
   await page.route('**/csrf', (route) => route.fulfill({
     status: 200,
@@ -78,6 +79,54 @@ test.beforeEach(async ({ page }) => {
       }),
     })
   })
+
+  await page.route('**/agents/leads', async (route) => {
+    if (route.request().method() === 'GET') {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(leads) })
+    }
+    const lead = {
+      ...route.request().postDataJSON(),
+      id: `lead-${leads.length + 1}`,
+      score: null,
+      fit: null,
+      reasoning: null,
+      nextStep: null,
+      qualifiedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    leads.unshift(lead)
+    return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify(lead) })
+  })
+  await page.route('**/agents/leads/import', async (route) => {
+    const imported = route.request().postDataJSON().leads.map((lead, index) => ({
+      ...lead,
+      id: `imported-${index + 1}`,
+      score: null,
+      fit: null,
+      reasoning: null,
+      nextStep: null,
+      qualifiedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }))
+    leads.unshift(...imported)
+    return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify(imported) })
+  })
+  await page.route('**/agents/leads/*/qualify', async (route) => {
+    const leadId = new URL(route.request().url()).pathname.split('/').at(-2)
+    const lead = leads.find((item) => item.id === leadId)
+    const result = {
+      id: leadId,
+      score: 86,
+      fit: 'QUALIFIED',
+      reasoning: 'Empresa e setor aderentes ao ICP informado.',
+      nextStep: 'Validar o desafio com a pessoa responsável pela área.',
+      qualifiedAt: new Date().toISOString(),
+    }
+    Object.assign(lead, result)
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(result) })
+  })
 })
 
 test('QA-001 - Página de login', async ({ page }) => {
@@ -123,7 +172,7 @@ test('QA-004 - Catálogo marca os agentes não implementados', async ({ page }) 
   await page.goto('/agentes')
   await expect(page.getByText('Agente de Produção de Conteúdo').first()).toBeVisible()
   await expect(page.getByText('Agente de Prospecção e Qualificação de Leads').first()).toBeVisible()
-  await expect(page.getByText('7 em breve')).toBeVisible()
+  await expect(page.getByText('6 em breve')).toBeVisible()
 })
 
 test('QA-005 - Pesquisa de agentes', async ({ page }) => {
@@ -193,6 +242,37 @@ test('QA-011 - Histórico lista conversas persistidas', async ({ page }) => {
   await page.getByRole('link', { name: /Conteúdo para o histórico/ }).click()
   await expect(page).toHaveURL(/\/agentes\/copywriter\?conversationId=conversation-1/)
   await expect(page.getByText('Rascunho de conteúdo para revisão.').first()).toBeVisible()
+})
+
+test('QA-012 - Cadastro manual e qualificação de lead', async ({ page }) => {
+  await page.goto('/agentes')
+  await page.getByText('Agente de Prospecção e Qualificação de Leads').first().click()
+  await expect(page).toHaveURL(/\/agentes\/lead$/)
+  await page.getByLabel('Perfil ideal de cliente (ICP) *').fill('Empresas B2B de tecnologia com 20 a 200 funcionários.')
+  await page.getByLabel('Nome *').fill('Marina Costa')
+  await page.getByLabel('Empresa', { exact: true }).fill('Acme Tecnologia')
+  await page.getByLabel('E-mail').fill('marina@acme.example')
+  await page.getByRole('button', { name: 'Cadastrar lead' }).click()
+  await expect(page.getByText('Lead cadastrado.')).toBeVisible()
+  await page.getByRole('button', { name: 'Qualificar lead' }).click()
+  await expect(page.getByText('Pontuação: 86/100')).toBeVisible()
+  await expect(page.getByText('Empresa e setor aderentes ao ICP informado.')).toBeVisible()
+  await expect(page.getByText(/Validar o desafio com a pessoa responsável/)).toBeVisible()
+})
+
+test('QA-013 - Importação de leads por CSV', async ({ page }) => {
+  await page.goto('/agentes')
+  await page.getByText('Agente de Prospecção e Qualificação de Leads').first().click()
+  await page.getByLabel('Arquivo CSV').setInputFiles({
+    name: 'leads.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from('nome;empresa;email\nJoão Lima;"Empresa, Sul";joao@example.com'),
+  })
+  await expect(page.getByText('leads.csv: 1 lead(s) pronto(s) para importação.')).toBeVisible()
+  await page.getByRole('button', { name: 'Confirmar importação' }).click()
+  await expect(page.getByText('1 lead(s) importado(s) com sucesso.')).toBeVisible()
+  await expect(page.getByText('João Lima')).toBeVisible()
+  await expect(page.getByText(/Empresa, Sul/)).toBeVisible()
 })
 
 test('QA-015 - Rota interna redireciona quando a sessão expira', async ({ page }) => {

@@ -41,6 +41,30 @@ export type ContentConversationMessage = {
   createdAt: string
 }
 
+export type LeadInput = {
+  name: string
+  company?: string
+  jobTitle?: string
+  email?: string
+  phone?: string
+  website?: string
+  industry?: string
+  companySize?: string
+  location?: string
+  notes?: string
+}
+
+export type Lead = LeadInput & {
+  id: string
+  score: number | null
+  fit: 'QUALIFIED' | 'REVIEW' | 'NOT_QUALIFIED' | null
+  reasoning: string | null
+  nextStep: string | null
+  qualifiedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export class ApiError extends Error {
   readonly status: number
 
@@ -56,6 +80,12 @@ let csrf: { headerName: string; token: string } | null = null
 let csrfRequest: Promise<{ headerName: string; token: string }> | null = null
 let refreshRequest: Promise<boolean> | null = null
 const RETRY_REQUEST = { csrf: true, auth: true }
+
+function normalizeLead(input: LeadInput): LeadInput {
+  return Object.fromEntries(
+    Object.entries(input).map(([field, value]) => [field, value?.trim() || undefined]),
+  ) as LeadInput
+}
 
 function apiUrl(path: string) {
   return `${apiBaseUrl}${path}`
@@ -180,5 +210,28 @@ export const api = {
   conversationMessages: (conversationId: string) =>
     request<ContentConversationMessage[]>(
       `/agents/content/conversations/${encodeURIComponent(conversationId)}/messages`,
+    ),
+
+  listLeads: () => request<Lead[]>('/agents/leads'),
+
+  createLead: (input: LeadInput) =>
+    request<Lead>('/agents/leads', {
+      method: 'POST',
+      body: JSON.stringify(normalizeLead(input)),
+    }),
+
+  importLeads: (leads: LeadInput[]) =>
+    request<Lead[]>('/agents/leads/import', {
+      method: 'POST',
+      body: JSON.stringify({ leads: leads.map(normalizeLead) }),
+    }),
+
+  qualifyLead: (leadId: string, idealCustomerProfile: string) =>
+    request<Pick<Lead, 'id' | 'score' | 'fit' | 'reasoning' | 'nextStep' | 'qualifiedAt'>>(
+      `/agents/leads/${encodeURIComponent(leadId)}/qualify`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ idealCustomerProfile }),
+      },
     ),
 }

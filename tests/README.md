@@ -27,6 +27,8 @@ Para obter o resultado atualizado, execute `npx playwright test`; o relatório H
 | QA-009 | Nova conversa | A ação reinicia o workspace. |
 | QA-010 | Voltar aos agentes | O retorno leva ao catálogo de agentes. |
 | QA-011 | Histórico | Conversas são listadas e podem ser reabertas. |
+| QA-012 | Cadastro e qualificação de lead | Um lead manual é comparado ao ICP e recebe pontuação e recomendação. |
+| QA-013 | Importação de CSV | Leads de um arquivo CSV são importados e listados. |
 | QA-015 | Rota inexistente | Uma rota desconhecida redireciona para o login. |
 
 A numeração preserva os identificadores dos cenários planejados; por isso há intervalos entre alguns IDs.
@@ -138,4 +140,4 @@ Esta bateria cobre fluxos funcionais básicos da interface em **Chromium desktop
 
 ---
 
-**Escopo atual:** 12 cenários funcionais com respostas simuladas da API; consulte a execução mais recente do Playwright para o resultado.
+**Escopo atual:** 14 cenários funcionais com respostas simuladas da API; consulte a execução mais recente do Playwright para o resultado.

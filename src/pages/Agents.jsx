@@ -65,7 +65,7 @@ export default function Agents() {
         <div>
           <h1 className="text-[26px] font-medium">Exploração de Agentes</h1>
           <p className="mt-1 text-xs text-accent">
-            {agents.filter((agent) => agent.available).length} agente disponível · {agents.length - 1} em breve
+            {agents.filter((agent) => agent.available).length} agentes disponíveis · {agents.filter((agent) => !agent.available).length} em breve
           </p>
         </div>
 
