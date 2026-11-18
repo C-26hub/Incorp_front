@@ -1,7 +1,13 @@
 
 import { test, expect } from '@playwright/test'
 
+// As rotas internas exigem a flag de login simulado (ver ProtectedRoute).
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('incorp:auth', 'true'))
+})
+
 test('QA-001 - Página de login', async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem('incorp:auth'))
   await page.goto('/login')
 
   await expect(page).toHaveURL(/\/login$/)
@@ -9,6 +15,7 @@ test('QA-001 - Página de login', async ({ page }) => {
 })
 
 test('QA-002 - Página de cadastro', async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem('incorp:auth'))
   await page.goto('/cadastro')
 
   await expect(page).toHaveURL(/\/cadastro$/)
@@ -34,10 +41,7 @@ test('QA-005 - Pesquisa de agentes', async ({ page }) => {
 test('QA-006 - Filtro por departamento', async ({ page }) => {
   await page.goto('/agentes')
 
-  await page.getByRole('button', {
-    name: 'Comercial',
-    exact: true,
-  }).click()
+  await page.getByRole('tab', { name: 'Comercial', exact: true }).click()
 
   await expect(page.getByText('Proposal Builder').first()).toBeVisible()
   await expect(page.getByText('CopyWriter Pro')).toHaveCount(0)
@@ -49,15 +53,13 @@ test('QA-007 - Abrir Workspace', async ({ page }) => {
   await page.getByText('CopyWriter Pro').first().click()
 
   await expect(page).toHaveURL(/\/agentes\/copywriter$/)
-  await expect(
-  page.getByRole('heading', { name: 'Conversa', exact: true })
-).toBeVisible()
+  await expect(page.getByPlaceholder('Mensagem para CopyWriter Pro...')).toBeVisible()
 })
 
 test('QA-008 - Enviar mensagem demonstrativa', async ({ page }) => {
   await page.goto('/agentes/copywriter')
 
-  await page.getByPlaceholder('Digite sua mensagem...')
+  await page.getByPlaceholder('Mensagem para CopyWriter Pro...')
     .fill('Crie uma campanha de marketing')
 
   await page.getByRole('button', { name: 'Enviar' }).click()
@@ -67,14 +69,14 @@ test('QA-008 - Enviar mensagem demonstrativa', async ({ page }) => {
   ).toBeVisible()
 
   await expect(
-    page.getByText(/Esta é uma demonstração do agente/)
+    page.getByText(/Resposta de demonstração do CopyWriter Pro/)
   ).toBeVisible()
 })
 
 test('QA-009 - Nova conversa', async ({ page }) => {
   await page.goto('/agentes/copywriter')
 
-  await page.getByPlaceholder('Digite sua mensagem...')
+  await page.getByPlaceholder('Mensagem para CopyWriter Pro...')
     .fill('Mensagem de teste')
 
   await page.getByRole('button', { name: 'Enviar' }).click()
@@ -87,14 +89,13 @@ test('QA-009 - Nova conversa', async ({ page }) => {
 test('QA-010 - Voltar aos agentes', async ({ page }) => {
   await page.goto('/agentes/copywriter')
 
-  await page.getByRole('button', {
-    name: 'Voltar aos agentes',
-  }).click()
+  await page.getByRole('link', { name: 'Voltar para agentes' }).click()
 
   await expect(page).toHaveURL(/\/agentes$/)
 })
 
 test('QA-015 - Rota inexistente', async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem('incorp:auth'))
   await page.goto('/pagina-inexistente')
 
   await expect(page).toHaveURL(/\/login$/)

@@ -148,7 +148,7 @@ Esta bateria cobre fluxos funcionais básicos da interface em **Chromium desktop
 ## Próximas etapas de QA
 
 1. Validar os formulários de login e cadastro, incluindo mensagens de erro.
-2. Ampliar a cobertura para Dashboard, Histórico, Favoritos e Configurações.
+2. Ampliar a cobertura para Dashboard, Histórico e Configurações.
 3. Adicionar testes responsivos para telas móveis.
 4. Adicionar verificações básicas de acessibilidade.
 5. Integrar os testes ao pipeline de CI após alinhamento com a equipe.

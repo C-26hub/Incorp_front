@@ -1,14 +1,14 @@
 export const agents = [
-  { id: 'copywriter', initials: 'CO', name: 'CopyWriter Pro', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', uses: 842, fav: true, desc: 'Geração de textos para campanhas, posts e e-mails de marketing.' },
-  { id: 'social', initials: 'SO', name: 'Social Planner', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Beta', uses: 388, fav: true, desc: 'Planejamento e criação de calendário editorial para redes sociais.' },
-  { id: 'brand', initials: 'BR', name: 'Brand Voice', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', uses: 295, fav: false, desc: 'Revisão e adequação de conteúdos ao tom de voz da marca Incorp.' },
-  { id: 'seo', initials: 'SE', name: 'SEO Analyst', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', uses: 617, fav: false, desc: 'Análise de palavras-chave, sugestões de otimização e relatórios de posicionamento.' },
-  { id: 'campaign', initials: 'CA', name: 'Campaign Insights', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', uses: 451, fav: false, desc: 'Análise de performance de campanhas e geração de insights acionáveis.' },
-  { id: 'proposal', initials: 'PR', name: 'Proposal Builder', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 973, fav: true, desc: 'Criação automática de propostas comerciais personalizadas por cliente.' },
-  { id: 'lead', initials: 'LE', name: 'Lead Qualifier', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 756, fav: true, desc: 'Qualificação automática de leads com base em critérios de ICP.' },
-  { id: 'pricing', initials: 'PR', name: 'Pricing Assistant', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 534, fav: false, desc: 'Sugestões de precificação com base em margem, concorrência e histórico.' },
-  { id: 'followup', initials: 'FO', name: 'Follow-up Engine', dept: 'Comercial', category: 'Relacionamento', status: 'Beta', uses: 312, fav: false, desc: 'Sugestão e automação de sequências de follow-up para oportunidades abertas.' },
-  { id: 'contract', initials: 'CO', name: 'Contract Reviewer', dept: 'Comercial', category: 'Jurídico & Contratos', status: 'Online', uses: 198, fav: false, desc: 'Revisão de contratos comerciais com alertas de cláusulas sensíveis.' },
+  { id: 'copywriter', initials: 'CO', name: 'CopyWriter Pro', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', uses: 842, desc: 'Geração de textos para campanhas, posts e e-mails de marketing.' },
+  { id: 'social', initials: 'SO', name: 'Social Planner', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Beta', uses: 388, desc: 'Planejamento e criação de calendário editorial para redes sociais.' },
+  { id: 'brand', initials: 'BR', name: 'Brand Voice', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', uses: 295, desc: 'Revisão e adequação de conteúdos ao tom de voz da marca Incorp.' },
+  { id: 'seo', initials: 'SE', name: 'SEO Analyst', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', uses: 617, desc: 'Análise de palavras-chave, sugestões de otimização e relatórios de posicionamento.' },
+  { id: 'campaign', initials: 'CA', name: 'Campaign Insights', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', uses: 451, desc: 'Análise de performance de campanhas e geração de insights acionáveis.' },
+  { id: 'proposal', initials: 'PR', name: 'Proposal Builder', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 973, desc: 'Criação automática de propostas comerciais personalizadas por cliente.' },
+  { id: 'lead', initials: 'LE', name: 'Lead Qualifier', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 756, desc: 'Qualificação automática de leads com base em critérios de ICP.' },
+  { id: 'pricing', initials: 'PR', name: 'Pricing Assistant', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 534, desc: 'Sugestões de precificação com base em margem, concorrência e histórico.' },
+  { id: 'followup', initials: 'FO', name: 'Follow-up Engine', dept: 'Comercial', category: 'Relacionamento', status: 'Beta', uses: 312, desc: 'Sugestão e automação de sequências de follow-up para oportunidades abertas.' },
+  { id: 'contract', initials: 'CO', name: 'Contract Reviewer', dept: 'Comercial', category: 'Jurídico & Contratos', status: 'Online', uses: 198, desc: 'Revisão de contratos comerciais com alertas de cláusulas sensíveis.' },
 ]
 
 export const history = [

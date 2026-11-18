@@ -1,13 +1,9 @@
 import { useNavigate } from 'react-router-dom'
-import { Star } from 'lucide-react'
-import { useFavorites } from '../context/FavoritesContext'
 import Avatar from './Avatar'
 import StatusBadge from './StatusBadge'
 
 export default function AgentCard({ agent }) {
   const navigate = useNavigate()
-  const { isFavorite, toggleFavorite } = useFavorites()
-  const fav = isFavorite(agent.id)
 
   const open = () => navigate(`/agentes/${agent.id}`)
 
@@ -17,7 +13,6 @@ export default function AgentCard({ agent }) {
       tabIndex={0}
       onClick={open}
       onKeyDown={(e) => {
-        if (e.target !== e.currentTarget) return // ignora Enter/Espaço vindos da estrela
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
           open()
@@ -28,24 +23,7 @@ export default function AgentCard({ agent }) {
       <div className="flex items-start justify-between gap-2">
         <Avatar initials={agent.initials} dept={agent.dept} />
 
-        <div className="flex items-center gap-1.5">
-          <StatusBadge status={agent.status} />
-          <button
-            type="button"
-            aria-label={fav ? `Remover ${agent.name} dos favoritos` : `Adicionar ${agent.name} aos favoritos`}
-            aria-pressed={fav}
-            onClick={(e) => {
-              e.stopPropagation()
-              toggleFavorite(agent.id)
-            }}
-            className="rounded-md p-1 transition hover:bg-amber-50"
-          >
-            <Star
-              size={17}
-              className={fav ? 'fill-amber-400 text-amber-400' : 'text-muted/60 group-hover:text-muted'}
-            />
-          </button>
-        </div>
+        <StatusBadge status={agent.status} />
       </div>
 
       <h3 className="mt-3 text-[13px] font-semibold">{agent.name}</h3>

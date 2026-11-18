@@ -23,9 +23,8 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 | Agentes | Catálogo com pesquisa e filtros | Implementada no Front-end |
 | Dashboard | Indicadores e gráficos | Dados demonstrativos |
 | Histórico | Listagem de atividades/conversas | Dados demonstrativos |
-| Favoritos | Visualização dos agentes favoritos | Dados demonstrativos |
 | Configurações | Interface de preferências | Integração/persistência pendentes |
-| Workspace (chat) | Conversa com o agente selecionado | Planejado |
+| Workspace (chat) | Conversa com o agente selecionado | Demonstração, resposta simulada |
 
 ## Catálogo de agentes
 
@@ -33,9 +32,9 @@ O catálogo atual apresenta **10 agentes**, organizados em dois departamentos:
 
 **Marketing:** CopyWriter Pro, Social Planner, Brand Voice, SEO Analyst e Campaign Insights.
 
-**Comercial:** Proposal Builder, Lead Qualifier, Pricing Assistant, Follow-up Engine e Sales Forecast.
+**Comercial:** Proposal Builder, Lead Qualifier, Pricing Assistant, Follow-up Engine e Contract Reviewer.
 
-As informações de status, favoritos e quantidade de usos são **simuladas** nesta fase.
+As informações de status e quantidade de usos são **simuladas** nesta fase.
 
 ## Tecnologias
 
@@ -101,7 +100,6 @@ Incorp_front/
 │   │   ├── login/
 │   │   ├── Agents.jsx
 │   │   ├── Dashboard.jsx
-│   │   ├── Favorites.jsx
 │   │   ├── History.jsx
 │   │   ├── Home.jsx
 │   │   └── Settings.jsx
@@ -135,9 +133,9 @@ O Front-end será responsável por coletar as entradas do usuário e apresentar 
 
 ## Próximas etapas
 
-1. Criar a tela **Workspace** e conectar a seleção de agentes à rota correspondente.
+1. Conectar o **Workspace** ao Back-end (hoje a resposta do agente é simulada).
 2. Revisar todos os botões e fluxos de navegação.
-3. Tornar os favoritos e controles de interface interativos.
+3. Tornar os demais controles de interface interativos (Salvar, Exportar, Repetir, Configurações).
 4. Melhorar a experiência em dispositivos móveis e a acessibilidade.
 5. Padronizar estados de carregamento, erro e ausência de resultados.
 6. Alinhar com o Back-end os contratos de API, autenticação e histórico.
