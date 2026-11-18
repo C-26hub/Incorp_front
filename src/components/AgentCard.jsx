@@ -5,20 +5,26 @@ import StatusBadge from './StatusBadge'
 export default function AgentCard({ agent }) {
   const navigate = useNavigate()
 
-  const open = () => navigate(`/agentes/${agent.id}`)
+  const open = () => {
+    if (agent.available) navigate(`/agentes/${agent.id}`)
+  }
 
   return (
     <div
-      role="button"
-      tabIndex={0}
+      role={agent.available ? 'button' : undefined}
+      tabIndex={agent.available ? 0 : undefined}
       onClick={open}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (agent.available && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault()
           open()
         }
       }}
-      className="group flex cursor-pointer flex-col rounded-xl border border-line bg-white p-4 shadow-sm outline-none transition hover:border-brand/40 hover:shadow-md focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-brand/10"
+      className={`group flex flex-col rounded-xl border border-line bg-white p-4 shadow-sm outline-none transition ${
+        agent.available
+          ? 'cursor-pointer hover:border-brand/40 hover:shadow-md focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-brand/10'
+          : 'cursor-default opacity-80'
+      }`}
     >
       <div className="flex items-start justify-between gap-2">
         <Avatar initials={agent.initials} dept={agent.dept} />
@@ -30,9 +36,9 @@ export default function AgentCard({ agent }) {
       <p className="mt-1 flex-1 text-[11.5px] leading-relaxed text-muted">{agent.desc}</p>
 
       <div className="mt-3 flex items-center justify-between text-[11px] text-muted">
-        <span>{agent.uses} usos</span>
+        <span>{agent.available ? 'API integrada' : 'Não implementado'}</span>
         <span className="font-medium text-brand opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
-          Usar agente →
+          {agent.available ? 'Usar agente →' : 'Em breve'}
         </span>
       </div>
     </div>

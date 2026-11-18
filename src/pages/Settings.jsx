@@ -122,7 +122,7 @@ export default function Settings() {
               to="/perfil"
               className="rounded-lg border border-line bg-white px-4 py-2 text-xs font-medium hover:border-brand/40"
             >
-              Editar perfil
+              Ver perfil
             </Link>
           </div>
 

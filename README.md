@@ -5,9 +5,9 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-frontend-3178c6)
 ![Vite](https://img.shields.io/badge/Vite-build-646cff)
 
-Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O projeto é desenvolvido em equipe, com foco inicial na navegação e na experiência do usuário. A integração com os serviços de Back-end será realizada em uma etapa posterior.
+Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O frontend integra autenticação, cadastro, histórico e o agente de produção de conteúdo à API Spring Boot.
 
-> **Estado atual:** o repositório contém uma aplicação Front-end navegável e dados demonstrativos. A presença de um agente no catálogo não significa que ele esteja conectado a um modelo de IA.
+> **Estado atual:** apenas o Agente de Produção de Conteúdo está conectado ao backend. Os demais itens do catálogo são exibidos como “Em breve” e não aceitam interação.
 
 ## Visão geral
 
@@ -17,24 +17,26 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 
 | Tela | Descrição | Situação |
 | --- | --- | --- |
-| Login | Formulário de entrada e navegação para a aplicação | Demonstração, sem autenticação real |
-| Cadastro | Formulário com validações no navegador | Demonstração, sem persistência no servidor |
+| Login | Autenticação na API e consulta do usuário atual | Integrado; sessão em cookies HttpOnly |
+| Cadastro | Criação de conta na API | Integrado |
 | Home | Visão inicial e acesso às funcionalidades | Implementada no Front-end |
-| Agentes | Catálogo com pesquisa e filtros | Implementada no Front-end |
-| Dashboard | Indicadores e gráficos | Dados demonstrativos |
-| Histórico | Listagem de atividades/conversas | Dados demonstrativos |
-| Configurações | Interface de preferências | Integração/persistência pendentes |
-| Workspace (chat) | Conversa com o agente selecionado | Demonstração, resposta simulada |
+| Agentes | Catálogo com pesquisa e filtros | Um agente integrado; demais indisponíveis |
+| Histórico | Conversas do agente de conteúdo | Integrado ao backend |
+| Configurações | Preferências de interface | Armazenamento local no navegador |
+| Workspace | Geração e continuação de conteúdo | Integrado; revisão humana necessária |
 
 ## Catálogo de agentes
 
-O catálogo atual apresenta **10 agentes**, organizados em dois departamentos:
+O catálogo apresenta os oito agentes priorizados para o projeto:
 
-**Marketing:** CopyWriter Pro, Social Planner, Brand Voice, SEO Analyst e Campaign Insights.
-
-**Comercial:** Proposal Builder, Lead Qualifier, Pricing Assistant, Follow-up Engine e Contract Reviewer.
-
-As informações de status e quantidade de usos são **simuladas** nesta fase.
+1. Produção de Conteúdo — disponível
+2. Prospecção e Qualificação de Leads — em breve
+3. SEO — em breve
+4. Mídias Sociais — em breve
+5. Relatórios e KPIs — em breve
+6. Tráfego — em breve
+7. Editais e Licitações — em breve
+8. Apoio Comercial — em breve
 
 ## Tecnologias
 
@@ -44,7 +46,6 @@ As informações de status e quantidade de usos são **simuladas** nesta fase.
 - **React Router** — navegação entre páginas.
 - **Tailwind CSS** — estilização e responsividade.
 - **Lucide React** — ícones.
-- **Recharts** — gráficos do Dashboard.
 
 ## Pré-requisitos
 
@@ -72,7 +73,9 @@ Inicie o ambiente de desenvolvimento:
 npm run dev
 ```
 
-Abra no navegador o endereço exibido pelo Vite (normalmente `http://localhost:5173`).
+Abra no navegador o endereço exibido pelo Vite (normalmente `http://localhost:5173`). A configuração local encaminha `/csrf`, `/auth`, `/users` e `/agents` para o backend em `http://localhost:8080`. Inicie o backend e configure nele as credenciais do provedor de IA antes de usar a geração de conteúdo. Para desenvolvimento via HTTP, configure `COOKIE_SECURE=false` somente no backend local; em produção, mantenha HTTPS e cookies `Secure`.
+
+Para apontar diretamente a outro endereço de API, defina `VITE_API_BASE_URL` no ambiente do frontend e configure o backend para permitir a origem correspondente. Não coloque chaves do Gemini ou outros segredos nas variáveis `VITE_*`.
 
 Para validar a compilação de produção:
 
@@ -94,12 +97,11 @@ Incorp_front/
 ├── src/
 │   ├── assets/              # Imagens e identidade visual
 │   ├── components/          # Componentes reutilizáveis
-│   ├── data/                # Dados demonstrativos dos agentes
+│   ├── data/                # Catálogo local de agentes
 │   ├── pages/               # Telas da aplicação
 │   │   ├── cadastro/
 │   │   ├── login/
 │   │   ├── Agents.jsx
-│   │   ├── Dashboard.jsx
 │   │   ├── History.jsx
 │   │   ├── Home.jsx
 │   │   └── Settings.jsx
@@ -129,17 +131,13 @@ Serviços de IA e banco de dados
 
 O Front-end será responsável por coletar as entradas do usuário e apresentar os resultados. O Back-end deverá validar permissões, gerenciar sessões, proteger credenciais, registrar conversas e acessar os provedores de IA.
 
-**Segurança:** chaves de API, tokens privados e credenciais de serviços não devem ser incorporados ao código público do Front-end. Os formulários atuais não substituem um mecanismo de autenticação real.
+**Segurança:** o frontend envia cookies com `credentials: 'include'`, obtém o token CSRF do backend e não persiste JWTs em JavaScript ou no `localStorage`. O backend controla a autenticação e autorização. Em desenvolvimento local, o proxy do Vite evita requisições cross-origin; em ambientes publicados, configure HTTPS, CORS e atributos de cookie no backend.
 
 ## Próximas etapas
 
-1. Conectar o **Workspace** ao Back-end (hoje a resposta do agente é simulada).
-2. Revisar todos os botões e fluxos de navegação.
-3. Tornar os demais controles de interface interativos (Salvar, Exportar, Repetir, Configurações).
-4. Melhorar a experiência em dispositivos móveis e a acessibilidade.
-5. Padronizar estados de carregamento, erro e ausência de resultados.
-6. Alinhar com o Back-end os contratos de API, autenticação e histórico.
-7. Implementar testes e otimizar o carregamento dos arquivos JavaScript.
+1. Adicionar endpoints backend para os outros sete agentes.
+2. Implementar recuperação de senha e edição de dados da conta no backend.
+3. Ampliar testes de integração e acessibilidade.
 
 ## Colaboração
 

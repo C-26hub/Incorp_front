@@ -65,7 +65,7 @@ export default function Agents() {
         <div>
           <h1 className="text-[26px] font-medium">Exploração de Agentes</h1>
           <p className="mt-1 text-xs text-accent">
-            {agents.length} agentes disponíveis em {DEPARTMENTS.length} departamentos
+            {agents.filter((agent) => agent.available).length} agente disponível · {agents.length - 1} em breve
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export default function Agents() {
           >
             <option value="todos">Todos os status</option>
             <option value="Online">Online</option>
-            <option value="Beta">Beta</option>
+            <option value="Em breve">Em breve</option>
           </select>
         </div>
       </div>

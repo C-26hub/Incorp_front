@@ -1,25 +1,32 @@
+import { useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Settings, LogOut, Home, LayoutGrid, BarChart3 } from 'lucide-react'
+import { Settings, LogOut, Home, LayoutGrid } from 'lucide-react'
 import { useProfile } from '../context/ProfileContext'
+import { useAuth } from '../context/AuthContext'
 import UserAvatar from './UserAvatar'
 
 const links = [
   { to: '/home', label: 'Início', icon: Home },
   { to: '/agentes', label: 'Agentes', icon: LayoutGrid },
-  { to: '/dashboard', label: 'Dashboard', icon: BarChart3 },
 ]
 
 export default function AppLayout() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { profile } = useProfile()
+  const { logout } = useAuth()
+  const [logoutError, setLogoutError] = useState('')
 
   // a tela de chat (/agentes/:id) ocupa a largura toda, sem padding
   const fullBleed = /^\/agentes\/[^/]+$/.test(pathname)
 
-  const logout = () => {
-    localStorage.removeItem('incorp:auth')
-    navigate('/login')
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch (error) {
+      setLogoutError(error instanceof Error ? error.message : 'Não foi possível encerrar a sessão.')
+    }
   }
 
   return (
@@ -77,13 +84,14 @@ export default function AppLayout() {
             </span>
           </NavLink>
 
-          <button onClick={logout} aria-label="Sair" className="text-white/60 transition hover:text-white">
+          <button onClick={handleLogout} aria-label="Sair" className="text-white/60 transition hover:text-white">
             <LogOut size={16} />
           </button>
         </div>
       </header>
 
       <main className={fullBleed ? '' : 'mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-10'}>
+        {logoutError && <p role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{logoutError}</p>}
         <Outlet />
       </main>
     </div>

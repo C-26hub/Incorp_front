@@ -13,7 +13,7 @@ function greeting() {
   return 'Boa noite'
 }
 
-const top = [...agents].sort((a, b) => b.uses - a.uses).slice(0, 5)
+const top = agents.filter((agent) => agent.available)
 
 const departments = [
   { name: 'Marketing', to: '/agentes?filtro=marketing', icon: Phone, bg: 'bg-accent-soft text-accent' },
@@ -62,7 +62,7 @@ export default function Home() {
             <div>
               <p className="text-[15px] font-medium">{name}</p>
               <p className="text-xs text-muted mt-0.5">
-                {agents.filter((a) => a.dept === name).length} agentes disponíveis
+                {agents.filter((a) => a.dept === name && a.available).length} agentes disponíveis
               </p>
             </div>
           </Link>
@@ -88,8 +88,8 @@ export default function Home() {
               <p className="text-[11px] text-muted mt-0.5">{a.dept} · {a.category}</p>
             </div>
             <div className="text-right leading-tight mr-2">
-              <p className="text-[13px] font-semibold">{a.uses}</p>
-              <p className="text-[10px] text-muted">usos</p>
+              <p className="text-[13px] font-semibold">Disponível</p>
+              <p className="text-[10px] text-muted">integração ativa</p>
             </div>
             <StatusBadge status={a.status} />
           </Link>

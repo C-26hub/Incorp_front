@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProfileProvider } from './context/ProfileContext'
+import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
 import Login from './pages/login/Login'
@@ -7,35 +8,35 @@ import Cadastro from './pages/cadastro/Cadastro'
 import Home from './pages/Home'
 import Agents from './pages/Agents'
 import Workspace from './pages/Workspace'
-import Dashboard from './pages/Dashboard'
 import History from './pages/History'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
 
 export default function App() {
   return (
-    <ProfileProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/cadastro" element={<Cadastro />} />
+    <AuthProvider>
+      <ProfileProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/cadastro" element={<Cadastro />} />
 
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AppLayout />}>
-              <Route path="/home" element={<Home />} />
-              <Route path="/agentes" element={<Agents />} />
-              <Route path="/agentes/:id" element={<Workspace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/historico" element={<History />} />
-              <Route path="/configuracoes" element={<Settings />} />
-              <Route path="/perfil" element={<Profile />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AppLayout />}>
+                <Route path="/home" element={<Home />} />
+                <Route path="/agentes" element={<Agents />} />
+                <Route path="/agentes/:id" element={<Workspace />} />
+                <Route path="/historico" element={<History />} />
+                <Route path="/configuracoes" element={<Settings />} />
+                <Route path="/perfil" element={<Profile />} />
+              </Route>
             </Route>
-          </Route>
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </ProfileProvider>
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ProfileProvider>
+    </AuthProvider>
   )
 }

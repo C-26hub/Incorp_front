@@ -30,32 +30,19 @@ function prepareImage(file) {
   })
 }
 
-const inputClass =
-  'h-11 w-full rounded-xl border border-line bg-white px-3.5 text-sm outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10'
-
 export default function Profile() {
   const { profile, updateProfile } = useProfile()
   const fileRef = useRef(null)
 
-  const [form, setForm] = useState({
-    name: profile.name,
-    email: profile.email,
-    role: profile.role,
-    photo: profile.photo,
-  })
-  const [erro, setErro] = useState('')
+  const [photoDraft, setPhotoDraft] = useState()
+  const photo = photoDraft ?? profile.photo
   const [erroFoto, setErroFoto] = useState('')
   const [salvo, setSalvo] = useState(false)
 
-  const alterado =
-    form.name !== profile.name ||
-    form.email !== profile.email ||
-    form.role !== profile.role ||
-    form.photo !== profile.photo
+  const alterado = photo !== profile.photo
 
   const setField = (field, value) => {
-    setForm((f) => ({ ...f, [field]: value }))
-    setErro('')
+    if (field === 'photo') setPhotoDraft(value)
     setSalvo(false)
   }
 
@@ -83,28 +70,13 @@ export default function Profile() {
 
   function onSubmit(event) {
     event.preventDefault()
-
-    if (!form.name.trim()) {
-      setErro('Informe seu nome.')
-      return
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      setErro('Informe um e-mail válido.')
-      return
-    }
-
-    updateProfile({
-      name: form.name.trim(),
-      email: form.email.trim(),
-      role: form.role.trim(),
-      photo: form.photo,
-    })
+    updateProfile({ photo })
+    setPhotoDraft(undefined)
     setSalvo(true)
   }
 
   function onCancel() {
-    setForm({ name: profile.name, email: profile.email, role: profile.role, photo: profile.photo })
-    setErro('')
+    setPhotoDraft(undefined)
     setErroFoto('')
     setSalvo(false)
   }
@@ -112,16 +84,16 @@ export default function Profile() {
   return (
     <div>
       <h1 className="text-[28px] font-medium">Meu perfil</h1>
-      <p className="mt-1 text-sm text-muted">Atualize seus dados e sua foto.</p>
+      <p className="mt-1 text-sm text-muted">Consulte seus dados e personalize sua foto.</p>
 
       <form onSubmit={onSubmit} noValidate className="mt-8 grid gap-6 lg:grid-cols-[320px_1fr]">
         {/* FOTO */}
         <section className="flex flex-col items-center rounded-2xl border border-line bg-white p-6 text-center">
-          <UserAvatar size={144} photo={form.photo} name={form.name} />
-          <p className="mt-4 text-[15px] font-medium">{form.name || 'Sem nome'}</p>
+          <UserAvatar size={144} photo={photo} name={profile.name} />
+          <p className="mt-4 text-[15px] font-medium">{profile.name || 'Sem nome'}</p>
           <p className="mt-0.5 text-xs text-muted">
             {profile.dept}
-            {form.role ? ` · ${form.role}` : ''}
+            {profile.role ? ` · ${profile.role}` : ''}
           </p>
 
           <input
@@ -141,10 +113,10 @@ export default function Profile() {
               className="flex h-10 items-center justify-center gap-2 rounded-xl border border-line bg-white text-[13px] font-medium hover:bg-page"
             >
               <Camera size={15} />
-              {form.photo ? 'Alterar foto' : 'Adicionar foto'}
+              {photo ? 'Alterar foto' : 'Adicionar foto'}
             </button>
 
-            {form.photo && (
+            {photo && (
               <button
                 type="button"
                 onClick={() => setField('photo', '')}
@@ -174,10 +146,10 @@ export default function Profile() {
             <label className="block md:col-span-2">
               <span className="mb-1.5 block text-xs font-medium">Nome completo</span>
               <input
-                value={form.name}
-                onChange={(e) => setField('name', e.target.value)}
+                value={profile.name}
+                readOnly
                 autoComplete="name"
-                className={inputClass}
+                className="h-11 w-full rounded-xl border border-line bg-page px-3.5 text-sm text-muted"
               />
             </label>
 
@@ -185,30 +157,23 @@ export default function Profile() {
               <span className="mb-1.5 block text-xs font-medium">E-mail corporativo</span>
               <input
                 type="email"
-                value={form.email}
-                onChange={(e) => setField('email', e.target.value)}
+                value={profile.email}
+                readOnly
                 autoComplete="email"
-                className={inputClass}
+                className="h-11 w-full rounded-xl border border-line bg-page px-3.5 text-sm text-muted"
               />
             </label>
 
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium">Cargo</span>
+              <span className="mb-1.5 block text-xs font-medium">Nível de acesso</span>
               <input
-                value={form.role}
-                onChange={(e) => setField('role', e.target.value)}
-                autoComplete="organization-title"
-                placeholder="Ex.: Analista de Marketing"
-                className={inputClass}
+                value={profile.role}
+                readOnly
+                className="h-11 w-full rounded-xl border border-line bg-page px-3.5 text-sm text-muted"
               />
             </label>
           </div>
 
-          {erro && (
-            <div role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-xs text-red-700">
-              {erro}
-            </div>
-          )}
           {salvo && (
             <div role="status" className="mt-5 rounded-xl border border-line bg-page px-3.5 py-3 text-xs text-brand">
               Alterações salvas.
@@ -221,7 +186,7 @@ export default function Profile() {
               disabled={!alterado}
               className="h-11 rounded-xl bg-brand px-6 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Salvar alterações
+              Salvar foto
             </button>
             <button
               type="button"
