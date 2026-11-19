@@ -5,9 +5,9 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-frontend-3178c6)
 ![Vite](https://img.shields.io/badge/Vite-build-646cff)
 
-Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O frontend integra autenticação, cadastro, histórico, produção de conteúdo e qualificação de leads à API Spring Boot.
+Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O frontend integra autenticação, cadastro, histórico, produção de conteúdo, qualificação de leads e auditoria SEO à API Spring Boot.
 
-> **Estado atual:** os agentes de Produção de Conteúdo e de Prospecção e Qualificação de Leads estão conectados ao backend. Os outros seis itens do catálogo são exibidos como “Em breve”.
+> **Estado atual:** os agentes de Produção de Conteúdo, Prospecção e Qualificação de Leads e SEO estão conectados ao backend. Os outros cinco itens do catálogo são exibidos como “Em breve”.
 
 ## Visão geral
 
@@ -20,13 +20,16 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 | Login | Autenticação na API e consulta do usuário atual | Integrado; sessão em cookies HttpOnly |
 | Cadastro | Criação de conta na API | Integrado |
 | Home | Visão inicial e acesso às funcionalidades | Implementada no Front-end |
-| Agentes | Catálogo com pesquisa e filtros | Dois agentes integrados; demais indisponíveis |
+| Agentes | Catálogo com pesquisa e filtros | Três agentes integrados; demais indisponíveis |
 | Histórico | Conversas do agente de conteúdo | Integrado ao backend |
 | Configurações | Preferências de interface | Armazenamento local no navegador |
 | Workspace de conteúdo | Geração e continuação de conteúdo | Integrado; revisão humana necessária |
 | Prospecção e qualificação | Cadastro manual, importação CSV e análise de leads | Integrado; usa ICP informado pelo usuário e não contata leads |
+| Auditoria de SEO | Análise on-page de uma URL pública e recomendações | Integrado; exige HTTPS, não segue redirecionamentos e envia sinais e contexto ao Gemini |
 
 O CSV aceita separador por vírgula ou ponto e vírgula, até 100 registros por arquivo e cabeçalhos em português ou inglês. A coluna de nome é obrigatória; por exemplo: `nome,empresa,cargo,email,setor,porte,localizacao,observacoes`. A qualificação envia ao Gemini o ICP e os dados de empresa, cargo, setor, porte, localização e observações; nome e dados de contato não são enviados.
+
+A auditoria de SEO coleta metadados e sinais on-page da página pública no momento da solicitação. O resultado é orientativo e não representa promessa de posicionamento nos buscadores. Informe apenas páginas e contextos que possam ser processados pelo provedor de IA; evite dados pessoais ou confidenciais.
 
 ## Catálogo de agentes
 
@@ -34,7 +37,7 @@ O catálogo apresenta os oito agentes priorizados para o projeto:
 
 1. Produção de Conteúdo — disponível
 2. Prospecção e Qualificação de Leads — disponível
-3. SEO — em breve
+3. SEO — disponível
 4. Mídias Sociais — em breve
 5. Relatórios e KPIs — em breve
 6. Tráfego — em breve
@@ -138,7 +141,7 @@ O Front-end coleta as entradas do usuário e apresenta os resultados. O Back-end
 
 ## Próximas etapas
 
-1. Adicionar endpoints backend para os outros seis agentes.
+1. Adicionar endpoints backend para os outros cinco agentes.
 2. Implementar recuperação de senha e edição de dados da conta no backend.
 3. Ampliar testes de integração e acessibilidade.
 

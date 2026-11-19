@@ -65,6 +65,32 @@ export type Lead = LeadInput & {
   updatedAt: string
 }
 
+export type SeoAnalysisRequest = {
+  url: string
+  targetKeyword?: string
+  supplementalText?: string
+}
+
+export type SeoAnalysisResult = {
+  url: string
+  title: string
+  metaDescription: string
+  canonicalUrl: string
+  h1Count: number
+  headingCount: number
+  imagesWithoutAlt: number
+  internalLinks: number
+  externalLinks: number
+  score: number
+  summary: string
+  titleAdvice: string
+  descriptionAdvice: string
+  contentAdvice: string
+  technicalAdvice: string
+  keywordAdvice: string
+  actions: string[]
+}
+
 export class ApiError extends Error {
   readonly status: number
 
@@ -234,4 +260,10 @@ export const api = {
         body: JSON.stringify({ idealCustomerProfile }),
       },
     ),
+
+  analyzeSeo: (input: SeoAnalysisRequest) =>
+    request<SeoAnalysisResult>('/agents/seo/analyze', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
 }

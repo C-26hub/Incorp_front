@@ -29,7 +29,10 @@ Para obter o resultado atualizado, execute `npx playwright test`; o relatório H
 | QA-011 | Histórico | Conversas são listadas e podem ser reabertas. |
 | QA-012 | Cadastro e qualificação de lead | Um lead manual é comparado ao ICP e recebe pontuação e recomendação. |
 | QA-013 | Importação de CSV | Leads de um arquivo CSV são importados e listados. |
-| QA-015 | Rota inexistente | Uma rota desconhecida redireciona para o login. |
+| QA-014 | Auditoria SEO | URL, palavra-chave e contexto são enviados; sinais e recomendações são exibidos. |
+| QA-015 | URL HTTPS obrigatória | URL HTTP é rejeitada antes de chamar o backend. |
+| QA-016 | Erro na análise SEO | Uma resposta de erro do backend é apresentada ao usuário. |
+| QA-017 | Rota protegida | Uma sessão expirada redireciona a rota autenticada para o login. |
 
 A numeração preserva os identificadores dos cenários planejados; por isso há intervalos entre alguns IDs.
 
@@ -140,4 +143,4 @@ Esta bateria cobre fluxos funcionais básicos da interface em **Chromium desktop
 
 ---
 
-**Escopo atual:** 14 cenários funcionais com respostas simuladas da API; consulte a execução mais recente do Playwright para o resultado.
+**Escopo atual:** 17 cenários funcionais com respostas simuladas da API; consulte a execução mais recente do Playwright para o resultado.

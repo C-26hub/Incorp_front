@@ -8,6 +8,26 @@ const authenticatedUser = {
   role: 'DEFAULT',
 }
 
+const seoAnalysis = {
+  url: 'https://www.exemplo.com/pagina',
+  title: 'Página de exemplo',
+  metaDescription: 'Descrição da página.',
+  canonicalUrl: 'https://www.exemplo.com/pagina',
+  h1Count: 1,
+  headingCount: 3,
+  imagesWithoutAlt: 2,
+  internalLinks: 4,
+  externalLinks: 1,
+  score: 82,
+  summary: 'A página tem uma estrutura inicial adequada, com pontos a melhorar.',
+  titleAdvice: 'Torne o título mais específico.',
+  descriptionAdvice: 'Inclua uma descrição única e clara.',
+  contentAdvice: 'Desenvolva melhor os tópicos principais.',
+  technicalAdvice: 'Adicione texto alternativo às imagens.',
+  keywordAdvice: 'Use a palavra-chave de forma natural.',
+  actions: ['Reescrever o título.', 'Adicionar textos alternativos.'],
+}
+
 test.beforeEach(async ({ page }) => {
   const conversations = []
   const transcripts = new Map()
@@ -127,6 +147,11 @@ test.beforeEach(async ({ page }) => {
     Object.assign(lead, result)
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(result) })
   })
+  await page.route('**/agents/seo/analyze', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify(seoAnalysis),
+  }))
 })
 
 test('QA-001 - Página de login', async ({ page }) => {
@@ -172,7 +197,7 @@ test('QA-004 - Catálogo marca os agentes não implementados', async ({ page }) 
   await page.goto('/agentes')
   await expect(page.getByText('Agente de Produção de Conteúdo').first()).toBeVisible()
   await expect(page.getByText('Agente de Prospecção e Qualificação de Leads').first()).toBeVisible()
-  await expect(page.getByText('6 em breve')).toBeVisible()
+  await expect(page.getByText('5 em breve')).toBeVisible()
 })
 
 test('QA-005 - Pesquisa de agentes', async ({ page }) => {
@@ -275,7 +300,59 @@ test('QA-013 - Importação de leads por CSV', async ({ page }) => {
   await expect(page.getByText(/Empresa, Sul/)).toBeVisible()
 })
 
-test('QA-015 - Rota interna redireciona quando a sessão expira', async ({ page }) => {
+test('QA-014 - Agente SEO envia URL e mostra auditoria', async ({ page }) => {
+  let submitted
+  await page.route('**/agents/seo/analyze', async (route) => {
+    submitted = route.request().postDataJSON()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(seoAnalysis),
+    })
+  })
+  await page.goto('/agentes')
+  await page.getByText('Agente de SEO').first().click()
+  await expect(page).toHaveURL(/\/agentes\/seo$/)
+  await page.getByLabel('URL pública da página (HTTPS) *').fill('https://www.exemplo.com/pagina')
+  await page.getByLabel('Palavra-chave-alvo').fill('auditoria SEO')
+  await page.getByLabel('Contexto adicional (opcional)').fill('Página institucional')
+  await page.getByRole('button', { name: 'Analisar página' }).click()
+  await expect(page.getByText('Pontuação de auditoria')).toBeVisible()
+  await expect(page.getByText('Torne o título mais específico.')).toBeVisible()
+  await expect(page.getByText('2 sem texto alternativo')).toBeVisible()
+  expect(submitted).toEqual({
+    url: 'https://www.exemplo.com/pagina',
+    targetKeyword: 'auditoria SEO',
+    supplementalText: 'Página institucional',
+  })
+})
+
+test('QA-015 - Agente SEO exige uma URL HTTPS antes de chamar a API', async ({ page }) => {
+  let requestSent = false
+  await page.route('**/agents/seo/analyze', async (route) => {
+    requestSent = true
+    await route.fulfill({ status: 500, body: 'Unexpected request' })
+  })
+  await page.goto('/agentes/seo')
+  await page.getByLabel('URL pública da página (HTTPS) *').fill('http://www.exemplo.com/pagina')
+  await page.getByRole('button', { name: 'Analisar página' }).click()
+  await expect(page.getByRole('alert')).toHaveText('Informe uma URL válida que comece com HTTPS.')
+  expect(requestSent).toBe(false)
+})
+
+test('QA-016 - Agente SEO apresenta erro da API', async ({ page }) => {
+  await page.route('**/agents/seo/analyze', (route) => route.fulfill({
+    status: 422,
+    contentType: 'application/problem+json',
+    body: JSON.stringify({ detail: 'A página redirecionou a solicitação.' }),
+  }))
+  await page.goto('/agentes/seo')
+  await page.getByLabel('URL pública da página (HTTPS) *').fill('https://www.exemplo.com/pagina')
+  await page.getByRole('button', { name: 'Analisar página' }).click()
+  await expect(page.getByRole('alert')).toContainText('A página redirecionou a solicitação.')
+})
+
+test('QA-017 - Rota protegida redireciona quando a sessão expira', async ({ page }) => {
   await page.route('**/auth/me', (route) => route.fulfill({ status: 401, body: 'Unauthorized' }))
   await page.goto('/agentes')
   await expect(page).toHaveURL(/\/login$/)
