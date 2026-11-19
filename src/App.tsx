@@ -10,6 +10,9 @@ import Agents from './pages/Agents'
 import Workspace from './pages/Workspace'
 import LeadsWorkspace from './pages/LeadsWorkspace'
 import SeoWorkspace from './pages/SeoWorkspace'
+import SocialWorkspace from './pages/SocialWorkspace'
+import ReportsWorkspace from './pages/ReportsWorkspace'
+import TrafficWorkspace from './pages/TrafficWorkspace'
 import History from './pages/History'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
@@ -30,6 +33,9 @@ export default function App() {
                 <Route path="/agentes" element={<Agents />} />
                 <Route path="/agentes/lead" element={<LeadsWorkspace />} />
                 <Route path="/agentes/seo" element={<SeoWorkspace />} />
+                <Route path="/agentes/social" element={<SocialWorkspace />} />
+                <Route path="/agentes/reports" element={<ReportsWorkspace />} />
+                <Route path="/agentes/traffic" element={<TrafficWorkspace />} />
                 <Route path="/agentes/:id" element={<Workspace />} />
                 <Route path="/historico" element={<History />} />
                 <Route path="/configuracoes" element={<Settings />} />

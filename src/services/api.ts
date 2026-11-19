@@ -91,6 +91,135 @@ export type SeoAnalysisResult = {
   actions: string[]
 }
 
+export type SocialPublicationRequest = {
+  platform: 'FACEBOOK' | 'INSTAGRAM' | 'LINKEDIN'
+  format: 'POST' | 'STORY' | 'REEL'
+  contentReference: string
+  caption: string
+  asset?: {
+    mimeType: string
+    width: number
+    height: number
+    sizeBytes: number
+  }
+  technicalRules: {
+    reference: string
+    maxCaptionCharacters: number
+    assetRequired: boolean
+    allowedMimeTypes: string[]
+    requiredWidth: number | null
+    requiredHeight: number | null
+    maxAssetBytes: number | null
+  }
+  contentBrandVersion: string
+  currentBrandVersion: string
+  plannedAt: string
+  approvedSlots: string[]
+  occupiedSlots: string[]
+  minimumSpacingMinutes: number
+  interactions: {
+    type: 'COMMENT' | 'DIRECT_MESSAGE'
+    reference: string
+    url?: string
+    pendingReply: boolean
+  }[]
+  confirmed: boolean
+}
+
+export type SocialPublicationResponse = {
+  status: 'REVIEW_REQUIRED' | 'READY_FOR_CONFIRMATION' | 'SIMULATED'
+  platform: SocialPublicationRequest['platform']
+  format: SocialPublicationRequest['format']
+  plannedAt: string
+  issues: string[]
+  technicalRulesReference: string
+  simulation: { reference: string; contentReference: string; brandVersion: string } | null
+  pendingInteractions: { type: 'COMMENT' | 'DIRECT_MESSAGE'; reference: string; url: string | null }[]
+}
+
+export type ReportRequest = {
+  product: string
+  startDate: string
+  endDate: string
+  metrics: {
+    channel: 'ORGANIC' | 'PAID' | 'LEADS' | 'BIDS' | 'SEO'
+    name: string
+    unit: string
+    goal: { value: number; direction: 'AT_LEAST' | 'AT_MOST' } | null
+    observations: { source: 'META' | 'GOOGLE' | 'LINKEDIN' | 'TRAFFIC_AGENT' | 'LEADS_AGENT' | 'BIDS_AGENT' | 'SEO_AGENT'; reference: string; value: number }[]
+    contextReferences: string[]
+  }[]
+  includeNarrative: boolean
+}
+
+export type ReportResponse = {
+  product: string
+  startDate: string
+  endDate: string
+  metrics: {
+    channel: ReportRequest['metrics'][number]['channel']
+    name: string
+    unit: string
+    value: number | null
+    goal: ReportRequest['metrics'][number]['goal']
+    status: 'MISSING' | 'CONFLICT' | 'NO_GOAL' | 'GOAL_MET' | 'GOAL_NOT_MET'
+    observations: ReportRequest['metrics'][number]['observations']
+    contextReferences: string[]
+  }[]
+  narrative: string | null
+}
+
+export type TrafficCampaignRequest = {
+  campaignReference: string
+  product: string
+  platform: 'META_ADS' | 'GOOGLE_ADS' | 'LINKEDIN_ADS'
+  objective: string
+  audience: string
+  startDate: string
+  endDate: string
+  budget: { currency: string; planned: number; ceiling: number }
+  goals: { maxCpa: number | null; minRoas: number | null }
+  creatives: { reference: string; validationReference: string; compatible: boolean }[]
+  observation: {
+    reference: string
+    startDate: string
+    endDate: string
+    impressions: number | null
+    reach: number | null
+    clicks: number | null
+    conversions: number | null
+    spend: number | null
+    attributedRevenue: number | null
+  } | null
+}
+
+export type TrafficCampaignResponse = {
+  campaignReference: string
+  product: string
+  platform: TrafficCampaignRequest['platform']
+  startDate: string
+  endDate: string
+  status: 'SIMULATED_DRAFT' | 'REVIEW_REQUIRED'
+  budget: TrafficCampaignRequest['budget']
+  goals: TrafficCampaignRequest['goals']
+  issues: string[]
+  strategy: string | null
+  performance: {
+    source: string
+    reference: string
+    startDate: string
+    endDate: string
+    metrics: {
+      name: string
+      unit: string
+      value: number | null
+      goal: { value: number; direction: 'AT_MOST' | 'AT_LEAST' } | null
+      status: 'MISSING' | 'NO_GOAL' | 'GOAL_MET' | 'GOAL_NOT_MET'
+    }[]
+    alerts: string[]
+  } | null
+}
+
 export class ApiError extends Error {
   readonly status: number
 
@@ -263,6 +392,24 @@ export const api = {
 
   analyzeSeo: (input: SeoAnalysisRequest) =>
     request<SeoAnalysisResult>('/agents/seo/analyze', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+
+  planSocialPublication: (input: SocialPublicationRequest) =>
+    request<SocialPublicationResponse>('/agents/social/publication-plan', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+
+  reportKpis: (input: ReportRequest) =>
+    request<ReportResponse>('/agents/reports/kpis', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+
+  planTrafficCampaign: (input: TrafficCampaignRequest) =>
+    request<TrafficCampaignResponse>('/agents/traffic/campaign-plan', {
       method: 'POST',
       body: JSON.stringify(input),
     }),

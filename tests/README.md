@@ -19,7 +19,7 @@ Para obter o resultado atualizado, execute `npx playwright test`; o relatório H
 | QA-001 | Página de login | A tela de login é exibida. |
 | QA-002 | Página de cadastro | A tela de cadastro é exibida. |
 | QA-003 | Login | A autenticação simulada redireciona para a área autenticada. |
-| QA-004 | Catálogo de agentes | A lista de agentes é apresentada. |
+| QA-004 | Catálogo de agentes | A lista mostra seis agentes disponíveis e dois ainda em breve. |
 | QA-005 | Pesquisa de agentes | A pesquisa filtra os agentes exibidos. |
 | QA-006 | Filtro por departamento | A seleção de departamento atualiza os agentes exibidos. |
 | QA-007 | Abrir Workspace | Um agente abre seu Workspace na rota correspondente. |
@@ -32,7 +32,10 @@ Para obter o resultado atualizado, execute `npx playwright test`; o relatório H
 | QA-014 | Auditoria SEO | URL, palavra-chave e contexto são enviados; sinais e recomendações são exibidos. |
 | QA-015 | URL HTTPS obrigatória | URL HTTP é rejeitada antes de chamar o backend. |
 | QA-016 | Erro na análise SEO | Uma resposta de erro do backend é apresentada ao usuário. |
-| QA-017 | Rota protegida | Uma sessão expirada redireciona a rota autenticada para o login. |
+| QA-017 | Mídias Sociais | Regras, calendário e versões da marca são enviados; pendências de revisão são exibidas. |
+| QA-018 | Relatórios e KPIs | Observações e metas são enviadas; os resultados e a síntese são exibidos. |
+| QA-019 | Tráfego | Briefing, orçamento, metas e criativo são enviados; o rascunho é exibido. |
+| QA-020 | Rota protegida | Uma sessão expirada redireciona a rota autenticada para o login. |
 
 A numeração preserva os identificadores dos cenários planejados; por isso há intervalos entre alguns IDs.
 
@@ -143,4 +146,4 @@ Esta bateria cobre fluxos funcionais básicos da interface em **Chromium desktop
 
 ---
 
-**Escopo atual:** 17 cenários funcionais com respostas simuladas da API; consulte a execução mais recente do Playwright para o resultado.
+**Escopo atual:** 20 cenários funcionais com respostas simuladas da API; consulte a execução mais recente do Playwright para o resultado.

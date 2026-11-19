@@ -197,7 +197,8 @@ test('QA-004 - Catálogo marca os agentes não implementados', async ({ page }) 
   await page.goto('/agentes')
   await expect(page.getByText('Agente de Produção de Conteúdo').first()).toBeVisible()
   await expect(page.getByText('Agente de Prospecção e Qualificação de Leads').first()).toBeVisible()
-  await expect(page.getByText('5 em breve')).toBeVisible()
+  await expect(page.getByText('Agente de Mídias Sociais').first()).toBeVisible()
+  await expect(page.getByText('6 agentes disponíveis · 2 em breve')).toBeVisible()
 })
 
 test('QA-005 - Pesquisa de agentes', async ({ page }) => {
@@ -352,7 +353,147 @@ test('QA-016 - Agente SEO apresenta erro da API', async ({ page }) => {
   await expect(page.getByRole('alert')).toContainText('A página redirecionou a solicitação.')
 })
 
-test('QA-017 - Rota protegida redireciona quando a sessão expira', async ({ page }) => {
+test('QA-017 - Agente de Mídias Sociais valida regras e versão da marca', async ({ page }) => {
+  let submitted
+  await page.route('**/agents/social/publication-plan', async (route) => {
+    submitted = route.request().postDataJSON()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'REVIEW_REQUIRED',
+        platform: 'LINKEDIN',
+        format: 'POST',
+        plannedAt: submitted.plannedAt,
+        issues: ['A versão da marca usada no conteúdo está desatualizada.'],
+        technicalRulesReference: submitted.technicalRules.reference,
+        simulation: null,
+        pendingInteractions: [],
+      }),
+    })
+  })
+
+  await page.goto('/agentes/social')
+  await page.getByLabel('Plataforma *').selectOption('LINKEDIN')
+  await page.getByLabel('Referência do conteúdo *').fill('campanha-novembro-post-01')
+  await page.getByLabel('Versão da marca usada no conteúdo *').fill('v1')
+  await page.getByLabel('Versão atual das diretrizes de marca *').fill('v2')
+  await page.getByLabel('Legenda final *').fill('Conteúdo aprovado para revisão.')
+  await page.getByLabel('Horário planejado *').fill('2030-11-20T10:00')
+  await page.getByLabel('Horários aprovados *').fill('2030-11-20T10:00')
+  await page.getByRole('button', { name: 'Validar publicação' }).click()
+
+  await expect(page.getByText('Revisão necessária')).toBeVisible()
+  await expect(page.getByText('A versão da marca usada no conteúdo está desatualizada.')).toBeVisible()
+  expect(submitted).toMatchObject({
+    platform: 'LINKEDIN',
+    contentReference: 'campanha-novembro-post-01',
+    contentBrandVersion: 'v1',
+    currentBrandVersion: 'v2',
+    caption: 'Conteúdo aprovado para revisão.',
+    confirmed: false,
+  })
+  expect(submitted.approvedSlots[0]).toBe(submitted.plannedAt)
+})
+
+test('QA-018 - Agente de Relatórios envia observações e mostra metas', async ({ page }) => {
+  let submitted
+  await page.route('**/agents/reports/kpis', async (route) => {
+    submitted = route.request().postDataJSON()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        product: 'Campanha de novembro',
+        startDate: '2026-11-01',
+        endDate: '2026-11-30',
+        metrics: [{
+          channel: 'PAID',
+          name: 'CPA',
+          unit: 'BRL',
+          value: 18,
+          goal: { value: 20, direction: 'AT_MOST' },
+          status: 'GOAL_MET',
+          observations: [{ source: 'TRAFFIC_AGENT', reference: 'relatorio-trafego-novembro', value: 18 }],
+          contextReferences: [],
+        }],
+        narrative: 'O CPA ficou abaixo da meta.',
+      }),
+    })
+  })
+
+  await page.goto('/agentes/reports')
+  await page.getByLabel('Produto ou iniciativa *').fill('Campanha de novembro')
+  await page.getByLabel('Data inicial *').fill('2026-11-01')
+  await page.getByLabel('Data final *').fill('2026-11-30')
+  await page.getByLabel('Nome do KPI *').fill('CPA')
+  await page.getByLabel('Unidade *').fill('BRL')
+  await page.getByLabel('Valor observado (opcional)').fill('18')
+  await page.getByLabel('Referência da fonte *').fill('relatorio-trafego-novembro')
+  await page.getByLabel('Meta (opcional)').fill('20')
+  await page.getByRole('button', { name: 'Gerar relatório' }).click()
+
+  await expect(page.getByText('Relatório de Campanha de novembro')).toBeVisible()
+  await expect(page.getByText('Meta atingida')).toBeVisible()
+  await expect(page.getByText('O CPA ficou abaixo da meta.')).toBeVisible()
+  expect(submitted.metrics[0]).toMatchObject({
+    channel: 'PAID',
+    name: 'CPA',
+    unit: 'BRL',
+    goal: { value: 20, direction: 'AT_MOST' },
+    observations: [{ source: 'TRAFFIC_AGENT', reference: 'relatorio-trafego-novembro', value: 18 }],
+  })
+})
+
+test('QA-019 - Agente de Tráfego envia briefing e exibe rascunho', async ({ page }) => {
+  let submitted
+  await page.route('**/agents/traffic/campaign-plan', async (route) => {
+    submitted = route.request().postDataJSON()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        campaignReference: 'campanha-produto-novembro',
+        product: 'Consultoria de marketing',
+        platform: 'META_ADS',
+        startDate: submitted.startDate,
+        endDate: submitted.endDate,
+        status: 'SIMULATED_DRAFT',
+        budget: { currency: 'BRL', planned: 500, ceiling: 600 },
+        goals: { maxCpa: 25, minRoas: null },
+        issues: [],
+        strategy: 'Priorize o público que demonstrar intenção de compra.',
+        performance: null,
+      }),
+    })
+  })
+
+  await page.goto('/agentes/traffic')
+  await page.getByLabel('Referência da campanha *').fill('campanha-produto-novembro')
+  await page.getByLabel('Produto ou serviço *').fill('Consultoria de marketing')
+  await page.getByLabel('Objetivo *').fill('Gerar solicitações de demonstração')
+  await page.getByLabel('Público-alvo *').fill('Empresas B2B de tecnologia')
+  await page.getByLabel('Orçamento planejado *').fill('500')
+  await page.getByLabel('Teto de orçamento *').fill('600')
+  await page.getByLabel('CPA máximo').fill('25')
+  await page.getByLabel('Referência do criativo *').fill('criativo-demo-v1')
+  await page.getByLabel('Referência da validação *').fill('revisao-marca-novembro')
+  await page.getByRole('button', { name: 'Planejar campanha' }).click()
+
+  await expect(page.getByText('Rascunho simulado')).toBeVisible()
+  await expect(page.getByText('Priorize o público que demonstrar intenção de compra.')).toBeVisible()
+  expect(submitted).toMatchObject({
+    campaignReference: 'campanha-produto-novembro',
+    product: 'Consultoria de marketing',
+    platform: 'META_ADS',
+    budget: { currency: 'BRL', planned: 500, ceiling: 600 },
+    goals: { maxCpa: 25, minRoas: null },
+    creatives: [{ reference: 'criativo-demo-v1', validationReference: 'revisao-marca-novembro', compatible: true }],
+    observation: null,
+  })
+})
+
+test('QA-020 - Rota protegida redireciona quando a sessão expira', async ({ page }) => {
   await page.route('**/auth/me', (route) => route.fulfill({ status: 401, body: 'Unauthorized' }))
   await page.goto('/agentes')
   await expect(page).toHaveURL(/\/login$/)

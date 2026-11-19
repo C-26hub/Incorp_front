@@ -18,7 +18,7 @@ export default function AppLayout() {
   const [logoutError, setLogoutError] = useState('')
 
   // a tela de chat (/agentes/:id) ocupa a largura toda, sem padding
-  const fullBleed = /^\/agentes\/[^/]+$/.test(pathname)
+  const fullBleed = pathname === '/agentes/copywriter'
 
   const handleLogout = async () => {
     try {
