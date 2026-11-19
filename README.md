@@ -90,21 +90,35 @@ Inicie o ambiente de desenvolvimento:
 npm run dev
 ```
 
-Abra no navegador o endereço exibido pelo Vite (normalmente `http://localhost:5173`). Por padrão, o proxy local encaminha `/csrf`, `/auth`, `/users` e `/agents` para o backend em `http://localhost:8080`. Inicie o backend e configure nele as credenciais do provedor de IA antes de usar os agentes. Para desenvolvimento via HTTP, configure `COOKIE_SECURE=false` somente no backend local; em produção, mantenha HTTPS e cookies `Secure`.
+Abra no navegador o endereço exibido pelo Vite (normalmente `http://localhost:5173`). Por padrão, o proxy local encaminha `/csrf`, `/auth`, `/users` e `/agents` para `https://cmiap.onrender.com`. Inicie o backend e configure nele as credenciais do provedor de IA antes de usar os agentes. Para desenvolvimento via HTTP, configure `COOKIE_SECURE=false` somente no backend local; em produção, mantenha HTTPS e cookies `Secure`.
 
-Para apontar diretamente a outro endereço de API, crie um arquivo `.env.local` na raiz do frontend:
+Para apontar diretamente a outro endereço de API, crie um arquivo `.env.local` na raiz do frontend. O valor substitui o endereço padrão:
 
 ```dotenv
 VITE_API_BASE_URL=https://endereco-da-api
 ```
 
-Configure o backend para permitir a origem correspondente. Variáveis `VITE_*` são incluídas no bundle do navegador; nunca coloque nelas chaves do Gemini ou outros segredos.
+Em produção, a API já aponta por padrão para `https://cmiap.onrender.com`. Configure o backend para permitir a origem pública do frontend com credenciais e cookies seguros. Variáveis `VITE_*` são incluídas no bundle do navegador; nunca coloque nelas chaves do Gemini ou outros segredos.
 
 Para validar a compilação de produção:
 
 ```bash
 npm run build
 ```
+
+## Publicar no Render
+
+Crie um **Web Service** conectado a este repositório, com a raiz do projeto como diretório:
+
+| Configuração | Valor |
+| --- | --- |
+| Runtime | Node |
+| Build Command | `npm install && npm run build` |
+| Start Command | `npm start` |
+
+O comando `npm start` serve a pasta `dist`, atende rotas da aplicação React e escuta a porta `PORT` fornecida pelo Render. Não é necessário configurar `VITE_API_BASE_URL` para usar o backend atual. Se definir essa variável no Render, use `https://cmiap.onrender.com` e faça uma nova compilação após alterar o valor.
+
+No backend, permita a origem exata do domínio Render criado para o frontend em CORS, com credenciais habilitadas; mantenha HTTPS e cookies de sessão compatíveis com requisições cross-origin (`Secure` e `SameSite=None`). Sem essa configuração no backend, o navegador bloqueará login e chamadas autenticadas. Se o serviço for criado como **Static Site**, use `npm install && npm run build` e publique `dist`; nesse tipo de serviço não há comando de start.
 
 Para executar os testes de interface (Playwright com Chromium):
 

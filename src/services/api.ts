@@ -230,7 +230,8 @@ export class ApiError extends Error {
   }
 }
 
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
+const defaultApiBaseUrl = import.meta.env.PROD ? 'https://cmiap.onrender.com' : ''
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || defaultApiBaseUrl).replace(/\/+$/, '')
 let csrf: { headerName: string; token: string } | null = null
 let csrfRequest: Promise<{ headerName: string; token: string }> | null = null
 let refreshRequest: Promise<boolean> | null = null

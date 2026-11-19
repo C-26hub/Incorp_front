@@ -9,10 +9,27 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/csrf': 'http://localhost:8080',
-      '/auth': 'http://localhost:8080',
-      '/users': 'http://localhost:8080',
-      '/agents': 'http://localhost:8080',
+      '/csrf': {
+        target: 'https://cmiap.onrender.com',
+        changeOrigin: true,
+      },
+      '/auth': {
+        target: 'https://cmiap.onrender.com',
+        changeOrigin: true,
+      },
+      '/users': {
+        target: 'https://cmiap.onrender.com',
+        changeOrigin: true,
+      },
+      '/agents': {
+        target: 'https://cmiap.onrender.com',
+        changeOrigin: true,
+      },
     },
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: Number(process.env.PORT) || 4173,
+    strictPort: true,
   },
 })
