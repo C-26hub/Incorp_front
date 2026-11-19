@@ -24,7 +24,7 @@ export default function Home() {
 
   // só os agentes do departamento da pessoa
   const disponiveis = useMemo(() => agentsOfDept(profile.dept), [profile.dept])
-  const top = useMemo(() => [...disponiveis].sort((a, b) => b.uses - a.uses).slice(0, 5), [disponiveis])
+  const top = useMemo(() => disponiveis.filter((agent) => agent.available).slice(0, 5), [disponiveis])
   const { icon: DeptIcon, bg: deptBg } = DEPT_VISUAL[profile.dept]
 
   const navigate = useNavigate()
@@ -66,7 +66,7 @@ export default function Home() {
       </Link>
 
       <div className="flex items-center justify-between mt-10 mb-4">
-        <h2 className="text-base font-medium">Agentes mais utilizados</h2>
+        <h2 className="text-base font-medium">Agentes disponíveis</h2>
         <Link to="/agentes" className="text-xs font-medium text-brand">Ver todos</Link>
       </div>
 
@@ -82,10 +82,6 @@ export default function Home() {
             <div className="flex-1 leading-tight">
               <p className="text-[13px] font-semibold">{a.name}</p>
               <p className="text-[11px] text-muted mt-0.5">{a.dept} · {a.category}</p>
-            </div>
-            <div className="text-right leading-tight mr-2">
-              <p className="text-[13px] font-semibold">Disponível</p>
-              <p className="text-[10px] text-muted">integração ativa</p>
             </div>
             <StatusBadge status={a.status} />
           </Link>
