@@ -90,18 +90,7 @@ export default function Settings() {
           />
         </Option>
 
-        <Option title="Idioma" description="Idioma da interface">
-          <select
-            value={settings.language}
-            onChange={(e) => set('language', e.target.value)}
-            aria-label="Idioma da interface"
-            className="h-10 rounded-lg border border-line bg-page px-3 text-xs outline-none focus:border-brand"
-          >
-            <option value="pt-BR">Português (Brasil)</option>
-            <option value="en-US">English</option>
-            <option value="es-ES">Español</option>
-          </select>
-        </Option>
+        
 
         <section className="rounded-2xl border border-line bg-white p-5 md:col-span-2 xl:col-span-3">
           <p className="text-sm font-medium">Conta</p>
