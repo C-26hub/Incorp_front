@@ -17,8 +17,8 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 
 | Tela | Descrição | Situação |
 | --- | --- | --- |
-| Login | Autenticação na API e consulta do usuário atual | Integrado; sessão em cookies HttpOnly |
-| Cadastro | Criação de conta na API | Integrado |
+| Login | Autenticação na API e confirmação do departamento cadastrado | Integrado; sessão em cookies HttpOnly |
+| Cadastro | Criação de conta na API com departamento obrigatório | Integrado |
 | Home | Acesso aos agentes disponíveis no departamento selecionado | Integrada ao catálogo |
 | Agentes | Catálogo com pesquisa, status e categorias | Seis agentes disponíveis e dois em breve |
 | Histórico | Conversas do agente de conteúdo | Integrado ao backend |
@@ -51,9 +51,9 @@ O catálogo apresenta os oito agentes priorizados para o projeto:
 
 ### Acesso por departamento
 
-No login, a pessoa escolhe o departamento **Marketing** ou **Comercial**. Essa escolha é salva no `localStorage` e usada pela interface para filtrar o catálogo e a Home. As rotas do workspace de conteúdo e de leads verificam o departamento selecionado; algumas telas especializadas ainda dependem apenas da autenticação e não têm essa verificação por departamento.
+No cadastro, a pessoa escolhe **Marketing** ou **Comercial**; o backend salva o departamento na conta. No login, a seleção precisa corresponder ao departamento cadastrado. A interface obtém o valor persistido por `/auth/me` e o usa para filtrar o catálogo e a Home. Algumas rotas de agentes ainda dependem apenas da autenticação e não verificam o departamento no backend.
 
-> A escolha do departamento é somente uma preferência da interface, **não uma autorização**. Não use esse filtro como barreira de segurança; as permissões devem ser definidas e verificadas no backend.
+> O departamento identifica a área do usuário e orienta os filtros da interface, mas não substitui autorização por endpoint. Não use esse filtro como barreira de segurança; as permissões devem ser definidas e verificadas no backend.
 
 ## Tecnologias
 
@@ -174,7 +174,7 @@ Serviços de IA e banco de dados
 
 O Front-end coleta as entradas do usuário e apresenta os resultados. O Back-end valida permissões, gerencia sessões, protege credenciais, persiste os leads por usuário e acessa o provedor de IA.
 
-**Segurança:** o frontend envia cookies com `credentials: 'include'`, obtém o token CSRF do backend e não persiste JWTs em JavaScript ou no `localStorage`. A sessão é autenticada pelo backend. A preferência de departamento salva no navegador não deve ser tratada como autorização. Em desenvolvimento local, o proxy do Vite evita requisições cross-origin; em ambientes publicados, configure HTTPS, CORS e atributos de cookie no backend.
+**Segurança:** o frontend envia cookies com `credentials: 'include'`, obtém o token CSRF do backend e não persiste JWTs em JavaScript ou no `localStorage`. A sessão e o departamento da conta são validados pelo backend. Em desenvolvimento local, o proxy do Vite evita requisições cross-origin; em ambientes publicados, configure HTTPS, CORS e atributos de cookie no backend.
 
 ## Itens ainda não implementados e próximos passos
 

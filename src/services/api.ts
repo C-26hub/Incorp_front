@@ -1,4 +1,5 @@
 export type UserRole = 'ADMINISTRATOR' | 'DEFAULT'
+export type UserDepartment = 'MARKETING' | 'COMMERCIAL'
 
 export type AuthUser = {
   id: string
@@ -6,6 +7,7 @@ export type AuthUser = {
   surname: string
   email: string
   role: UserRole
+  department: UserDepartment
 }
 
 export type ContentProductionRequest = {
@@ -335,10 +337,10 @@ async function request<T>(
 export const api = {
   currentUser: () => request<AuthUser>('/auth/me'),
 
-  login: (email: string, password: string) =>
+  login: (email: string, password: string, department: UserDepartment) =>
     request<void>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, department }),
     }),
 
   register: (input: {
@@ -347,6 +349,7 @@ export const api = {
     cpf: number
     email: string
     password: string
+    department: UserDepartment
   }) =>
     request<void>('/users/register', {
       method: 'POST',

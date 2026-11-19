@@ -12,20 +12,26 @@ import {
 } from "lucide-react";
 
 import incorpLogo from "../../assets/incorp-technology-logo.png";
-import { ApiError } from "../../services/api";
+import { ApiError, type UserDepartment } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
-import { useProfile } from "../../context/ProfileContext";
-import { DEPARTMENTS } from "../../data/agents";
 import "./Login.css";
+
+const departments: { value: UserDepartment; label: string }[] = [
+  { value: "MARKETING", label: "Marketing" },
+  { value: "COMMERCIAL", label: "Comercial" },
+];
+
+function isUserDepartment(value: string): value is UserDepartment {
+  return value === "MARKETING" || value === "COMMERCIAL";
+}
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { updateProfile } = useProfile();
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [dept, setDept] = useState("");
+  const [dept, setDept] = useState<UserDepartment | "">("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
@@ -46,15 +52,14 @@ export default function Login() {
       return;
     }
 
-    if (!DEPARTMENTS.includes(dept)) {
+    if (!isUserDepartment(dept)) {
       setErro("Selecione seu departamento.");
       return;
     }
 
     setEnviando(true);
     try {
-      await login(email.trim(), senha);
-      updateProfile({ dept });
+      await login(email.trim(), senha, dept);
       navigate("/home", { replace: true });
     } catch (error) {
       setErro(error instanceof ApiError ? error.message : "Não foi possível entrar. Tente novamente.");
@@ -216,7 +221,10 @@ export default function Login() {
 
                     <select
                       value={dept}
-                      onChange={(event) => setDept(event.target.value)}
+                      onChange={(event) => {
+                        const selected = event.target.value;
+                        setDept(isUserDepartment(selected) ? selected : "");
+                      }}
                       className={`h-12 w-full cursor-pointer appearance-none rounded-xl border border-[#DFE2EC] bg-[#F9FAFD] pr-11 pl-11 text-[14px] outline-none transition-all focus:border-[#3D3F94] focus:bg-white focus:ring-4 focus:ring-[#3D3F94]/10 ${
                         dept ? "text-[#25263A]" : "text-[#ADB2C1]"
                       }`}
@@ -224,9 +232,9 @@ export default function Login() {
                       <option value="" disabled>
                         Selecione seu departamento
                       </option>
-                      {DEPARTMENTS.map((nome) => (
-                        <option key={nome} value={nome} className="text-[#25263A]">
-                          {nome}
+                      {departments.map((department) => (
+                        <option key={department.value} value={department.value} className="text-[#25263A]">
+                          {department.label}
                         </option>
                       ))}
                     </select>
@@ -275,30 +283,6 @@ export default function Login() {
                   <ArrowRight size={16} />
                 </button>
               </form>
-
-              {/* DIVISOR */}
-              <div className="my-6 flex items-center gap-3">
-                <span className="h-px flex-1 bg-[#E4E6EF]" />
-                <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[#9DA3B4]">
-                  ou continue com
-                </span>
-                <span className="h-px flex-1 bg-[#E4E6EF]" />
-              </div>
-
-              {/* GOOGLE */}
-              <button
-                type="button"
-                onClick={() => {
-                  setErro("");
-                  setAviso("Login com Google ainda não integrado.");
-                }}
-                className="flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-[#DFE2EC] bg-white text-[13.5px] font-semibold text-[#3D4056] hover:bg-[#F9FAFD]"
-              >
-                <span className="text-lg font-bold text-[#4285F4]">
-                  G
-                </span>
-                Entrar com Google
-              </button>
 
               {/* CADASTRO */}
               <p className="mt-6 text-center text-[12.5px] text-[#6B7080]">

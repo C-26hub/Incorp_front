@@ -1,4 +1,5 @@
 export const DEPARTMENTS = ['Marketing', 'Comercial']
+export const DEPARTMENT_LABELS = { MARKETING: 'Marketing', COMMERCIAL: 'Comercial' }
 
 export const agents = [
   { id: 'copywriter', initials: 'CO', name: 'Agente de Produção de Conteúdo', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', available: true, desc: 'Geração de rascunhos para campanhas, posts e e-mails de marketing.' },

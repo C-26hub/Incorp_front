@@ -1,20 +1,9 @@
 import { createContext, useCallback, useContext, useState } from 'react'
 import { useAuth } from './AuthContext'
-import { DEPARTMENTS } from '../data/agents'
+import { DEPARTMENT_LABELS } from '../data/agents'
 
 /** @type {import('react').Context<any>} */
 const ProfileContext = createContext(null)
-const PROFILE_KEY = 'incorp:profile'
-
-function loadDepartment() {
-  try {
-    const savedProfile = JSON.parse(localStorage.getItem(PROFILE_KEY))
-    if (DEPARTMENTS.includes(savedProfile?.dept)) return savedProfile.dept
-  } catch {
-    // Ignora dados de perfil inválidos.
-  }
-  return 'Marketing'
-}
 
 export function getInitials(name = '') {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -25,8 +14,8 @@ export function getInitials(name = '') {
 
 export function ProfileProvider({ children }) {
   const { user } = useAuth()
-  const [dept, setDept] = useState(loadDepartment)
   const [photoState, setPhotoState] = useState({ userId: null, value: '' })
+  const dept = DEPARTMENT_LABELS[user?.department] ?? 'Marketing'
   const photo = photoState.userId === user?.id ? photoState.value : (() => {
     if (!user) return ''
     try {
@@ -37,15 +26,6 @@ export function ProfileProvider({ children }) {
   })()
 
   const updateProfile = useCallback((patch) => {
-    if (patch.dept && DEPARTMENTS.includes(patch.dept)) {
-      setDept(patch.dept)
-      try {
-        localStorage.setItem(PROFILE_KEY, JSON.stringify({ dept: patch.dept }))
-      } catch {
-        // O departamento selecionado continua disponível durante esta sessão.
-      }
-    }
-
     if (user && Object.hasOwn(patch, 'photo')) {
       const nextPhoto = patch.photo ?? ''
       setPhotoState({ userId: user.id, value: nextPhoto })

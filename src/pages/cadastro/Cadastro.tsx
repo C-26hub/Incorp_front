@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import incorpLogo from "../../assets/incorp-technology-logo.png";
 import { ApiError } from "../../services/api";
+import type { UserDepartment } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import "../login/Login.css";
 
@@ -35,6 +36,7 @@ export default function Cadastro() {
     password: "",
     confirmPassword: "",
   });
+  const [department, setDepartment] = useState<UserDepartment | "">("");
 
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
@@ -62,7 +64,7 @@ export default function Cadastro() {
     setErro("");
     setSucesso(false);
 
-    if (Object.values(form).some((value) => !value.trim())) {
+    if (Object.values(form).some((value) => !value.trim()) || !department) {
       setErro("Preencha todos os campos para continuar.");
       return;
     }
@@ -99,6 +101,7 @@ export default function Cadastro() {
         cpf: Number(form.cpf.replace(/\D/g, "")),
         email: form.email.trim(),
         password: form.password,
+        department,
       });
       setSucesso(true);
       window.setTimeout(() => navigate("/login"), 1200);
@@ -202,6 +205,31 @@ export default function Cadastro() {
                       />
                     </label>
                   ))}
+                  <label className="block sm:col-span-2">
+                    <span className="mb-1.5 block text-[12px] font-semibold text-[#3D4056]">
+                      Departamento
+                    </span>
+                    <select
+                      value={department}
+                      onChange={(event) => {
+                        const selected = event.target.value;
+                        setDepartment(
+                          selected === "MARKETING" || selected === "COMMERCIAL" ? selected : "",
+                        );
+                        setErro("");
+                        setSucesso(false);
+                      }}
+                      className={`h-11 w-full rounded-xl border border-[#DFE2EC] bg-[#F9FAFD] px-3.5 text-[13px] outline-none focus:border-[#3D3F94] focus:bg-white focus:ring-4 focus:ring-[#3D3F94]/10 ${
+                        department ? "text-[#25263A]" : "text-[#ADB2C1]"
+                      }`}
+                    >
+                      <option value="" disabled>
+                        Selecione seu departamento
+                      </option>
+                      <option value="MARKETING" className="text-[#25263A]">Marketing</option>
+                      <option value="COMMERCIAL" className="text-[#25263A]">Comercial</option>
+                    </select>
+                  </label>
                 </div>
 
                 {erro && (
