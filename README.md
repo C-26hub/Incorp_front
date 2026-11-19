@@ -205,6 +205,20 @@ Antes de executar `git add .`, revise o `git status` e certifique-se de não inc
 
 ---
 
+## Equipe
+
+Davi Felipe Silva Clemente - Dev Backend
+Gabriel Eduardo de Moura França - Dev Backend
+Pedro Henrique Miranda Valença - Dev Backend
+Marcelo barbosa - Dev Frontend
+Lucas Mendes da Silva - Dev Fronted
+Carolline Barbosa Ferreira -Dev Frontend
+Maria Cecília de Lima e Silva- Dev Frontend
+Marcos Vinicius Souza dos Santos - Dev FrontEnd
+Caio Sabino Coelho - Dev Backend
+
+---
+
 **Escopo atual:** seis agentes disponíveis, dois em breve e 25 testes automatizados de interface com respostas simuladas da API.
 
 **Incorp AI** — Projeto em evolução, desenvolvido por estudantes para fins acadêmicos
