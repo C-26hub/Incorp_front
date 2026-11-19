@@ -1,4 +1,5 @@
-import { createServer } from 'node:http'
+import { createServer, request as requestHttp } from 'node:http'
+import { request as requestHttps } from 'node:https'
 import { readFile, stat } from 'node:fs/promises'
 import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -6,6 +7,10 @@ import { fileURLToPath } from 'node:url'
 const distDirectory = resolve(fileURLToPath(new URL('.', import.meta.url)), 'dist')
 const indexPath = resolve(distDirectory, 'index.html')
 const port = Number(process.env.PORT ?? 10000)
+const apiOrigin = new URL(process.env.API_UPSTREAM_URL || 'https://cmiap.onrender.com')
+const apiRoutes = ['/auth', '/users', '/agents']
+const requestHeaders = ['accept', 'content-type', 'content-length', 'cookie', 'origin', 'x-csrf-token']
+const responseHeaders = ['content-type', 'content-length', 'content-encoding', 'set-cookie', 'www-authenticate', 'retry-after']
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -23,8 +28,63 @@ const contentTypes = {
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error(`PORT inválida: ${process.env.PORT}`)
 }
+if (!['http:', 'https:'].includes(apiOrigin.protocol) || apiOrigin.username || apiOrigin.password
+    || apiOrigin.pathname !== '/' || apiOrigin.search || apiOrigin.hash) {
+  throw new Error('API_UPSTREAM_URL precisa ser uma origem HTTP ou HTTPS.')
+}
+
+function pickHeaders(headers, names) {
+  return Object.fromEntries(names
+    .filter((name) => headers[name] !== undefined)
+    .map((name) => [name, headers[name]]))
+}
+
+function proxyApi(request, response, target) {
+  const connect = apiOrigin.protocol === 'https:' ? requestHttps : requestHttp
+  const upstream = connect(apiOrigin, {
+    method: request.method,
+    path: target.pathname + target.search,
+    headers: pickHeaders(request.headers, requestHeaders),
+  }, (result) => {
+    response.writeHead(result.statusCode ?? 502, {
+      ...pickHeaders(result.headers, responseHeaders),
+      'Cache-Control': 'no-store',
+    })
+    result.on('error', (error) => response.destroy(error))
+    result.pipe(response)
+  })
+  upstream.setTimeout(120_000, () => upstream.destroy(new Error('Tempo esgotado na API.')))
+  upstream.on('error', () => {
+    if (response.headersSent) {
+      response.destroy()
+      return
+    }
+    response.writeHead(502, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
+      .end(JSON.stringify({ message: 'Não foi possível conectar à API.' }))
+  })
+  response.on('close', () => {
+    if (!response.writableEnded) upstream.destroy()
+  })
+  request.pipe(upstream)
+}
 
 const server = createServer(async (request, response) => {
+  let target
+  try {
+    if (!request.url?.startsWith('/') || request.url.startsWith('//') || request.url.includes('\\')) {
+      throw new Error('Caminho inválido.')
+    }
+    target = new URL(request.url, 'http://localhost')
+  } catch {
+    response.writeHead(400).end('Requisição inválida.')
+    return
+  }
+  if (target.pathname === '/csrf' ||
+    apiRoutes.some((prefix) => target.pathname === prefix || target.pathname.startsWith(prefix + '/'))) {
+    proxyApi(request, response, target)
+    return
+  }
+
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     response.writeHead(405, { Allow: 'GET, HEAD' }).end()
     return
@@ -32,7 +92,7 @@ const server = createServer(async (request, response) => {
 
   let pathname
   try {
-    pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname)
+    pathname = decodeURIComponent(target.pathname)
   } catch {
     response.writeHead(400).end('Requisição inválida.')
     return

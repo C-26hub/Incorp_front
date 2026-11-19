@@ -1,5 +1,6 @@
 export type UserRole = 'ADMINISTRATOR' | 'DEFAULT'
 export type UserDepartment = 'MARKETING' | 'COMMERCIAL'
+export type LoginAccessProfile = UserDepartment | 'ADMINISTRATOR'
 
 export type AuthUser = {
   id: string
@@ -8,6 +9,10 @@ export type AuthUser = {
   email: string
   role: UserRole
   department: UserDepartment
+}
+
+export type ManagedUser = Pick<AuthUser, 'id' | 'name' | 'surname' | 'email' | 'role'> & {
+  department: UserDepartment | null
 }
 
 export type ContentProductionRequest = {
@@ -232,8 +237,7 @@ export class ApiError extends Error {
   }
 }
 
-const defaultApiBaseUrl = import.meta.env.PROD ? 'https://cmiap.onrender.com' : ''
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || defaultApiBaseUrl).replace(/\/+$/, '')
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
 let csrf: { headerName: string; token: string } | null = null
 let csrfRequest: Promise<{ headerName: string; token: string }> | null = null
 let refreshRequest: Promise<boolean> | null = null
@@ -337,10 +341,10 @@ async function request<T>(
 export const api = {
   currentUser: () => request<AuthUser>('/auth/me'),
 
-  login: (email: string, password: string, department: UserDepartment) =>
+  login: (email: string, password: string, profile: LoginAccessProfile) =>
     request<void>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password, department }),
+      body: JSON.stringify({ email, password, department: profile }),
     }),
 
   register: (input: {
@@ -349,11 +353,18 @@ export const api = {
     cpf: number
     email: string
     password: string
-    department: UserDepartment
   }) =>
     request<void>('/users/register', {
       method: 'POST',
       body: JSON.stringify(input),
+    }),
+
+  listUsers: () => request<ManagedUser[]>('/users'),
+
+  assignUserDepartment: (id: string, department: UserDepartment) =>
+    request<ManagedUser>(`/users/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ department }),
     }),
 
   logout: () => request<void>('/auth/logout', { method: 'POST' }),

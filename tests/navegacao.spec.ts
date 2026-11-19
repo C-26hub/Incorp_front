@@ -188,7 +188,7 @@ test('QA-002 - Cadastro envia os campos aceitos pela API', async ({ page }) => {
   await page.getByPlaceholder('nome@incorp.com.br').fill('ana@example.com')
   await page.getByPlaceholder('Mínimo de 6 caracteres').fill('senha123')
   await page.getByPlaceholder('Repita sua senha').fill('senha123')
-  await page.getByLabel('Departamento').selectOption('MARKETING')
+  await expect(page.getByLabel('Departamento')).toHaveCount(0)
   await page.getByRole('button', { name: 'Criar conta' }).click()
   await expect(page.getByRole('status')).toContainText('Conta criada com sucesso')
   expect(submitted).toEqual({
@@ -197,7 +197,6 @@ test('QA-002 - Cadastro envia os campos aceitos pela API', async ({ page }) => {
     cpf: 12345678909,
     email: 'ana@example.com',
     password: 'senha123',
-    department: 'MARKETING',
   })
 })
 
@@ -210,7 +209,7 @@ test('QA-003 - Login usa a API e abre a área autenticada', async ({ page }) => 
   await page.goto('/login')
   await page.getByPlaceholder('nome@incorp.com.br').fill('ana@example.com')
   await page.getByPlaceholder('Digite sua senha').fill('senha123')
-  await page.getByLabel('Departamento').selectOption('MARKETING')
+  await page.getByLabel('Perfil de acesso').selectOption('MARKETING')
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await expect(page).toHaveURL(/\/home$/)
   await expect(page.getByRole('heading', { name: /Ana/ })).toBeVisible()
@@ -219,6 +218,39 @@ test('QA-003 - Login usa a API e abre a área autenticada', async ({ page }) => 
     password: 'senha123',
     department: 'MARKETING',
   })
+})
+
+test('Administrador entra e define o departamento de uma nova conta', async ({ page }) => {
+  const pendingUser = { ...authenticatedUser, id: 'pending-user', department: null }
+  await page.route('**/auth/login', (route) => route.fulfill({ status: 204 }))
+  await page.route('**/auth/me', (route) => route.fulfill({
+    json: { ...authenticatedUser, role: 'ADMINISTRATOR' },
+  }))
+  await page.route('**/users', (route) => route.fulfill({ json: [pendingUser] }))
+  await page.route('**/users/pending-user', (route) => route.fulfill({
+    json: { ...pendingUser, department: 'COMMERCIAL' },
+  }))
+  await page.goto('/login')
+  await page.getByPlaceholder('nome@incorp.com.br').fill('admin@example.com')
+  await page.getByPlaceholder('Digite sua senha').fill('senha-de-teste')
+  await page.getByLabel('Perfil de acesso').selectOption({ label: 'Administrador' })
+  const request = page.waitForRequest('**/auth/login')
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
+  expect((await request).postDataJSON()).toMatchObject({ department: 'ADMINISTRATOR' })
+  await expect(page).toHaveURL(/\/usuarios$/)
+  await expect(page.getByText('Aguardando departamento')).toBeVisible()
+  await page.getByLabel('Departamento').selectOption('COMMERCIAL')
+  const assignment = page.waitForRequest('**/users/pending-user')
+  await page.getByRole('button', { name: 'Salvar' }).click()
+  expect((await assignment).postDataJSON()).toEqual({ department: 'COMMERCIAL' })
+  await expect(page.getByText('Departamento salvo.')).toBeVisible()
+  await expect(page.getByText('Aguardando departamento')).toHaveCount(0)
+})
+
+test('Usuário comum não abre o gerenciamento de departamentos', async ({ page }) => {
+  await page.goto('/usuarios')
+  await expect(page).toHaveURL(/\/home$/)
+  await expect(page.getByRole('link', { name: 'Usuários' })).toHaveCount(0)
 })
 
 test('QA-004 - Catálogo mostra agentes implementados do departamento', async ({ page }) => {
@@ -538,7 +570,7 @@ test('QA-021 - Login com departamento', async ({ page }) => {
 
   await page.getByPlaceholder('nome@incorp.com.br').fill('teste@incorp.com.br')
   await page.getByPlaceholder('Digite sua senha').fill('123456')
-  await page.getByLabel('Departamento').selectOption('COMMERCIAL')
+  await page.getByLabel('Perfil de acesso').selectOption('COMMERCIAL')
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
 
   await expect(page).toHaveURL(/\/home$/)
@@ -548,14 +580,14 @@ test('QA-021 - Login com departamento', async ({ page }) => {
   await expect(page.getByText('Agente de Produção de Conteúdo')).toHaveCount(0)
 })
 
-test('QA-022 - Login exige departamento', async ({ page }) => {
+test('QA-022 - Login exige perfil de acesso', async ({ page }) => {
   await page.goto('/login')
 
   await page.getByPlaceholder('nome@incorp.com.br').fill('teste@incorp.com.br')
   await page.getByPlaceholder('Digite sua senha').fill('123456')
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
 
-  await expect(page.getByText('Selecione seu departamento.')).toBeVisible()
+  await expect(page.getByText('Selecione seu perfil de acesso.')).toBeVisible()
   await expect(page).toHaveURL(/\/login$/)
 })
 

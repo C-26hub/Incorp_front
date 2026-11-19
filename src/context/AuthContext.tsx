@@ -1,10 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { api, type AuthUser, type UserDepartment } from '../services/api'
+import { api, type AuthUser, type LoginAccessProfile } from '../services/api'
 
 type AuthContextValue = {
   user: AuthUser | null
   loading: boolean
-  login: (email: string, password: string, department: UserDepartment) => Promise<void>
+  login: (email: string, password: string, profile: LoginAccessProfile) => Promise<void>
   register: (input: Parameters<typeof api.register>[0]) => Promise<void>
   logout: () => Promise<void>
 }
@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('cmiap:session-expired', expireSession)
   }, [loadCurrentUser])
 
-  const login = useCallback(async (email: string, password: string, department: UserDepartment) => {
-    await api.login(email, password, department)
+  const login = useCallback(async (email: string, password: string, profile: LoginAccessProfile) => {
+    await api.login(email, password, profile)
     setUser(await api.currentUser())
   }, [])
 
