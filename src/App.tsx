@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProfileProvider, useProfile } from './context/ProfileContext'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
 import Login from './pages/login/Login'
@@ -16,10 +16,16 @@ import TrafficWorkspace from './pages/TrafficWorkspace'
 import History from './pages/History'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
+import Users from './pages/Users'
 
 function CommercialLeadsRoute() {
   const { profile } = useProfile()
   return profile.dept === 'Comercial' ? <LeadsWorkspace /> : <Navigate to="/agentes" replace />
+}
+
+function AdministratorRoute() {
+  const { user } = useAuth()
+  return user?.role === 'ADMINISTRATOR' ? <Users /> : <Navigate to="/home" replace />
 }
 
 export default function App() {
@@ -45,6 +51,7 @@ export default function App() {
                 <Route path="/historico" element={<History />} />
                 <Route path="/configuracoes" element={<Settings />} />
                 <Route path="/perfil" element={<Profile />} />
+                <Route path="/usuarios" element={<AdministratorRoute />} />
               </Route>
             </Route>
 

@@ -17,8 +17,9 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 
 | Tela | Descrição | Situação |
 | --- | --- | --- |
-| Login | Autenticação na API e confirmação do departamento cadastrado | Integrado; sessão em cookies HttpOnly |
-| Cadastro | Criação de conta na API com departamento obrigatório | Integrado |
+| Login | Autenticação com perfil Marketing, Comercial ou Administrador | Integrado; sessão em cookies HttpOnly |
+| Cadastro | Criação de conta que aguarda atribuição de departamento | Integrado |
+| Usuários | Atribuição de departamento às contas comuns | Disponível para administradores |
 | Home | Acesso aos agentes disponíveis no departamento selecionado | Integrada ao catálogo |
 | Agentes | Catálogo com pesquisa, status e categorias | Seis agentes disponíveis e dois em breve |
 | Histórico | Conversas do agente de conteúdo | Integrado ao backend |
@@ -51,7 +52,7 @@ O catálogo apresenta os oito agentes priorizados para o projeto:
 
 ### Acesso por departamento
 
-No cadastro, a pessoa escolhe **Marketing** ou **Comercial**; o backend salva o departamento na conta. No login, a seleção precisa corresponder ao departamento cadastrado. A interface obtém o valor persistido por `/auth/me` e o usa para filtrar o catálogo e a Home. Algumas rotas de agentes ainda dependem apenas da autenticação e não verificam o departamento no backend.
+Depois do cadastro, um administrador entra com o perfil **Administrador** e atribui **Marketing** ou **Comercial** na tela **Usuários**. Uma conta comum só consegue entrar após a atribuição, escolhendo no login o perfil correspondente. A interface obtém o departamento de `/auth/me` para filtrar o catálogo e a Home. Algumas rotas de agentes ainda dependem apenas da autenticação e não verificam o departamento no backend.
 
 > O departamento identifica a área do usuário e orienta os filtros da interface, mas não substitui autorização por endpoint. Não use esse filtro como barreira de segurança; as permissões devem ser definidas e verificadas no backend.
 
@@ -98,7 +99,7 @@ Para apontar diretamente a outro endereço de API, crie um arquivo `.env.local` 
 VITE_API_BASE_URL=https://endereco-da-api
 ```
 
-Em produção, a API já aponta por padrão para `https://cmiap.onrender.com`. Configure o backend para permitir a origem pública do frontend com credenciais e cookies seguros. Variáveis `VITE_*` são incluídas no bundle do navegador; nunca coloque nelas chaves do Gemini ou outros segredos.
+Em produção, deixe `VITE_API_BASE_URL` sem valor para usar o proxy no domínio do frontend. O servidor usa `https://cmiap.onrender.com` como destino padrão. Variáveis `VITE_*` são incluídas no código enviado ao navegador. Guarde as chaves do Gemini somente no backend.
 
 Para validar a compilação de produção:
 
@@ -116,9 +117,9 @@ Crie um **Web Service** conectado a este repositório, com a raiz do projeto com
 | Build Command | `npm install && npm run build` |
 | Start Command | `npm start` |
 
-O comando `npm start` serve a pasta `dist`, atende rotas da aplicação React e escuta a porta `PORT` fornecida pelo Render. Não é necessário configurar `VITE_API_BASE_URL` para usar o backend atual. Se definir essa variável no Render, use `https://cmiap.onrender.com` e faça uma nova compilação após alterar o valor.
+O comando `npm start` serve a pasta `dist`, atende as rotas da aplicação React e encaminha `/csrf`, `/auth`, `/users` e `/agents` ao backend. Para apontar o proxy a outro backend, configure `API_UPSTREAM_URL` no serviço do frontend.
 
-No backend, permita a origem exata do domínio Render criado para o frontend em CORS, com credenciais habilitadas; mantenha HTTPS e cookies de sessão compatíveis com requisições cross-origin (`Secure` e `SameSite=None`). Sem essa configuração no backend, o navegador bloqueará login e chamadas autenticadas. Se o serviço for criado como **Static Site**, use `npm install && npm run build` e publique `dist`; nesse tipo de serviço não há comando de start.
+Use um **Web Service** no Render para executar o proxy. No backend, permita a origem exata do frontend em CORS e mantenha HTTPS e cookies seguros. Ao publicar uma versão que usava `VITE_API_BASE_URL` com o endereço direto do backend, retire esse valor e faça uma nova compilação para ativar o proxy.
 
 Para executar os testes de interface (Playwright com Chromium):
 

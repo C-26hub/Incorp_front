@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import incorpLogo from "../../assets/incorp-technology-logo.png";
 import { ApiError } from "../../services/api";
-import type { UserDepartment } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import "../login/Login.css";
 
@@ -36,7 +35,6 @@ export default function Cadastro() {
     password: "",
     confirmPassword: "",
   });
-  const [department, setDepartment] = useState<UserDepartment | "">("");
 
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
@@ -64,7 +62,7 @@ export default function Cadastro() {
     setErro("");
     setSucesso(false);
 
-    if (Object.values(form).some((value) => !value.trim()) || !department) {
+    if (Object.values(form).some((value) => !value.trim())) {
       setErro("Preencha todos os campos para continuar.");
       return;
     }
@@ -101,10 +99,9 @@ export default function Cadastro() {
         cpf: Number(form.cpf.replace(/\D/g, "")),
         email: form.email.trim(),
         password: form.password,
-        department,
       });
+      setForm((current) => ({ ...current, password: "", confirmPassword: "" }));
       setSucesso(true);
-      window.setTimeout(() => navigate("/login"), 1200);
     } catch (error) {
       setErro(error instanceof ApiError ? error.message : "Não foi possível criar a conta. Tente novamente.")
     } finally {
@@ -184,7 +181,13 @@ export default function Cadastro() {
                 </p>
               </header>
 
-              <form onSubmit={handleSubmit} noValidate>
+              {sucesso && (
+                <div role="status" className="rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-3 text-[12px] text-[#3D3F94]">
+                  Conta criada com sucesso. Aguarde o administrador definir seu departamento para entrar.
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} noValidate hidden={sucesso}>
                 <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
                   {campos.map((campo) => (
                     <label key={campo.key} className="block">
@@ -205,42 +208,11 @@ export default function Cadastro() {
                       />
                     </label>
                   ))}
-                  <label className="block sm:col-span-2">
-                    <span className="mb-1.5 block text-[12px] font-semibold text-[#3D4056]">
-                      Departamento
-                    </span>
-                    <select
-                      value={department}
-                      onChange={(event) => {
-                        const selected = event.target.value;
-                        setDepartment(
-                          selected === "MARKETING" || selected === "COMMERCIAL" ? selected : "",
-                        );
-                        setErro("");
-                        setSucesso(false);
-                      }}
-                      className={`h-11 w-full rounded-xl border border-[#DFE2EC] bg-[#F9FAFD] px-3.5 text-[13px] outline-none focus:border-[#3D3F94] focus:bg-white focus:ring-4 focus:ring-[#3D3F94]/10 ${
-                        department ? "text-[#25263A]" : "text-[#ADB2C1]"
-                      }`}
-                    >
-                      <option value="" disabled>
-                        Selecione seu departamento
-                      </option>
-                      <option value="MARKETING" className="text-[#25263A]">Marketing</option>
-                      <option value="COMMERCIAL" className="text-[#25263A]">Comercial</option>
-                    </select>
-                  </label>
                 </div>
 
                 {erro && (
                   <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-[12px] text-red-700">
                     {erro}
-                  </div>
-                )}
-
-                {sucesso && (
-                  <div role="status" className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-3 text-[12px] text-[#3D3F94]">
-                    Conta criada com sucesso. Redirecionando para o login…
                   </div>
                 )}
 
@@ -255,13 +227,13 @@ export default function Cadastro() {
               </form>
 
               <p className="mt-6 text-center text-[12.5px] text-[#6B7080]">
-                Já possui uma conta?{" "}
+                {!sucesso && "Já possui uma conta? "}
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
                   className="font-semibold text-[#3D3F94] hover:text-[#00AFEE]"
                 >
-                  Entrar
+                  {sucesso ? "Ir para o login" : "Entrar"}
                 </button>
               </p>
             </div>

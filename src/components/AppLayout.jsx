@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Settings, LogOut, Home, LayoutGrid } from 'lucide-react'
+import { Settings, LogOut, Home, LayoutGrid, Users } from 'lucide-react'
 import { useProfile } from '../context/ProfileContext'
 import { useAuth } from '../context/AuthContext'
 import UserAvatar from './UserAvatar'
@@ -9,12 +9,13 @@ const links = [
   { to: '/home', label: 'Início', icon: Home },
   { to: '/agentes', label: 'Agentes', icon: LayoutGrid },
 ]
+const usersLink = { to: '/usuarios', label: 'Usuários', icon: Users }
 
 export default function AppLayout() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { profile } = useProfile()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const [logoutError, setLogoutError] = useState('')
 
   // a tela de chat (/agentes/:id) ocupa a largura toda, sem padding
@@ -35,7 +36,7 @@ export default function AppLayout() {
         <div className="flex min-w-0 items-center gap-4 sm:gap-8">
           <span className="text-sm font-semibold">Incorp AI</span>
           <nav className="flex gap-1">
-            {links.map(({ to, label, icon: Icon }) => (
+            {(user?.role === 'ADMINISTRATOR' ? [...links, usersLink] : links).map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
