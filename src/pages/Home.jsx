@@ -84,8 +84,8 @@ export default function Home() {
               <p className="text-[11px] text-muted mt-0.5">{a.dept} · {a.category}</p>
             </div>
             <div className="text-right leading-tight mr-2">
-              <p className="text-[13px] font-semibold">{a.uses}</p>
-              <p className="text-[10px] text-muted">usos</p>
+              <p className="text-[13px] font-semibold">Disponível</p>
+              <p className="text-[10px] text-muted">integração ativa</p>
             </div>
             <StatusBadge status={a.status} />
           </Link>

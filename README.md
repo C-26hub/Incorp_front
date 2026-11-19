@@ -5,35 +5,44 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-frontend-3178c6)
 ![Vite](https://img.shields.io/badge/Vite-build-646cff)
 
-Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O projeto é desenvolvido em equipe, com foco inicial na navegação e na experiência do usuário. A integração com os serviços de Back-end será realizada em uma etapa posterior.
+Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O frontend integra autenticação, cadastro, histórico, produção de conteúdo, qualificação de leads e auditoria SEO à API Spring Boot.
 
-> **Estado atual:** o repositório contém uma aplicação Front-end navegável e dados demonstrativos. A presença de um agente no catálogo não significa que ele esteja conectado a um modelo de IA.
+> **Estado atual:** os agentes de Produção de Conteúdo, Prospecção e Qualificação de Leads e SEO estão conectados ao backend. Os outros cinco itens do catálogo são exibidos como “Em breve”.
 
 ## Visão geral
 
-A plataforma reúne agentes especializados em uma interface única, permitindo que usuários encontrem ferramentas por departamento, categoria e status. A proposta é evoluir para uma solução com autenticação, conversas, histórico e integração segura com APIs.
+A plataforma reúne agentes especializados em uma interface única, permitindo que usuários encontrem ferramentas por departamento, categoria e status, com autenticação e integração segura com a API.
 
 ### Telas existentes
 
 | Tela | Descrição | Situação |
 | --- | --- | --- |
-| Login | Formulário de entrada com escolha do **departamento** | Demonstração, sem autenticação real |
-| Cadastro | Formulário com validações no navegador | Demonstração, sem persistência no servidor |
+| Login | Autenticação na API e consulta do usuário atual | Integrado; sessão em cookies HttpOnly |
+| Cadastro | Criação de conta na API | Integrado |
 | Home | Visão inicial e acesso às funcionalidades | Implementada no Front-end |
-| Agentes | Catálogo do departamento do usuário, com pesquisa e filtro de status | Implementada no Front-end |
-| Histórico | Interações do departamento do usuário | Dados demonstrativos |
-| Configurações | Interface de preferências | Integração/persistência pendentes |
-| Workspace (chat) | Conversa com o agente selecionado | Demonstração, resposta simulada |
+| Agentes | Catálogo com pesquisa e filtros | Três agentes integrados; demais indisponíveis |
+| Histórico | Conversas do agente de conteúdo | Integrado ao backend |
+| Configurações | Preferências de interface | Armazenamento local no navegador |
+| Workspace de conteúdo | Geração e continuação de conteúdo | Integrado; revisão humana necessária |
+| Prospecção e qualificação | Cadastro manual, importação CSV e análise de leads | Integrado; usa ICP informado pelo usuário e não contata leads |
+| Auditoria de SEO | Análise on-page de uma URL pública e recomendações | Integrado; exige HTTPS, não segue redirecionamentos e envia sinais e contexto ao Gemini |
+
+O CSV aceita separador por vírgula ou ponto e vírgula, até 100 registros por arquivo e cabeçalhos em português ou inglês. A coluna de nome é obrigatória; por exemplo: `nome,empresa,cargo,email,setor,porte,localizacao,observacoes`. A qualificação envia ao Gemini o ICP e os dados de empresa, cargo, setor, porte, localização e observações; nome e dados de contato não são enviados.
+
+A auditoria de SEO coleta metadados e sinais on-page da página pública no momento da solicitação. O resultado é orientativo e não representa promessa de posicionamento nos buscadores. Informe apenas páginas e contextos que possam ser processados pelo provedor de IA; evite dados pessoais ou confidenciais.
 
 ## Catálogo de agentes
 
-O catálogo atual apresenta **10 agentes**, organizados em dois departamentos:
+O catálogo apresenta os oito agentes priorizados para o projeto:
 
-**Marketing:** CopyWriter Pro, Social Planner, Brand Voice, SEO Analyst e Campaign Insights.
-
-**Comercial:** Proposal Builder, Lead Qualifier, Pricing Assistant, Follow-up Engine e Contract Reviewer.
-
-As informações de status e quantidade de usos são **simuladas** nesta fase.
+1. Produção de Conteúdo — disponível
+2. Prospecção e Qualificação de Leads — disponível
+3. SEO — disponível
+4. Mídias Sociais — em breve
+5. Relatórios e KPIs — em breve
+6. Tráfego — em breve
+7. Editais e Licitações — em breve
+8. Apoio Comercial — em breve
 
 ### Acesso por departamento
 
@@ -76,7 +85,9 @@ Inicie o ambiente de desenvolvimento:
 npm run dev
 ```
 
-Abra no navegador o endereço exibido pelo Vite (normalmente `http://localhost:5173`).
+Abra no navegador o endereço exibido pelo Vite (normalmente `http://localhost:5173`). A configuração local encaminha `/csrf`, `/auth`, `/users` e `/agents` para o backend em `http://localhost:8080`. Inicie o backend e configure nele as credenciais do provedor de IA antes de usar a geração de conteúdo. Para desenvolvimento via HTTP, configure `COOKIE_SECURE=false` somente no backend local; em produção, mantenha HTTPS e cookies `Secure`.
+
+Para apontar diretamente a outro endereço de API, defina `VITE_API_BASE_URL` no ambiente do frontend e configure o backend para permitir a origem correspondente. Não coloque chaves do Gemini ou outros segredos nas variáveis `VITE_*`.
 
 Para validar a compilação de produção:
 
@@ -98,7 +109,7 @@ Incorp_front/
 ├── src/
 │   ├── assets/              # Imagens e identidade visual
 │   ├── components/          # Componentes reutilizáveis
-│   ├── data/                # Dados demonstrativos dos agentes
+│   ├── data/                # Catálogo local de agentes
 │   ├── pages/               # Telas da aplicação
 │   │   ├── cadastro/
 │   │   ├── login/
@@ -118,31 +129,27 @@ Incorp_front/
 
 A aplicação utiliza a identidade **Incorp AI**, com logomarca própria, tons de violeta e azul e interface adaptável a diferentes tamanhos de tela. O favicon usa a logomarca do projeto, quando o arquivo `public/favicon.png` está presente.
 
-## Arquitetura e integração futura
+## Arquitetura e integração
 
 ```text
 Usuário
    ↓
 Front-end (React + TypeScript)
    ↓  HTTPS / API
-Back-end (a definir com a equipe responsável)
+Back-end (Spring Boot)
    ↓
 Serviços de IA e banco de dados
 ```
 
-O Front-end será responsável por coletar as entradas do usuário e apresentar os resultados. O Back-end deverá validar permissões, gerenciar sessões, proteger credenciais, registrar conversas e acessar os provedores de IA.
+O Front-end coleta as entradas do usuário e apresenta os resultados. O Back-end valida permissões, gerencia sessões, protege credenciais, persiste os leads por usuário e acessa o provedor de IA.
 
-**Segurança:** chaves de API, tokens privados e credenciais de serviços não devem ser incorporados ao código público do Front-end. Os formulários atuais não substituem um mecanismo de autenticação real.
+**Segurança:** o frontend envia cookies com `credentials: 'include'`, obtém o token CSRF do backend e não persiste JWTs em JavaScript ou no `localStorage`. O backend controla a autenticação e autorização. Em desenvolvimento local, o proxy do Vite evita requisições cross-origin; em ambientes publicados, configure HTTPS, CORS e atributos de cookie no backend.
 
 ## Próximas etapas
 
-1. Conectar o **Workspace** ao Back-end (hoje a resposta do agente é simulada).
-2. Revisar todos os botões e fluxos de navegação.
-3. Tornar os demais controles de interface interativos (Salvar, Exportar, Repetir, Configurações).
-4. Melhorar a experiência em dispositivos móveis e a acessibilidade.
-5. Padronizar estados de carregamento, erro e ausência de resultados.
-6. Alinhar com o Back-end os contratos de API, autenticação e histórico.
-7. Implementar testes e otimizar o carregamento dos arquivos JavaScript.
+1. Adicionar endpoints backend para os outros cinco agentes.
+2. Implementar recuperação de senha e edição de dados da conta no backend.
+3. Ampliar testes de integração e acessibilidade.
 
 ## Colaboração
 

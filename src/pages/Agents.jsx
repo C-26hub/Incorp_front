@@ -71,7 +71,7 @@ export default function Agents() {
           >
             <option value="todos">Todos os status</option>
             <option value="Online">Online</option>
-            <option value="Beta">Beta</option>
+            <option value="Em breve">Em breve</option>
           </select>
         </div>
       </div>

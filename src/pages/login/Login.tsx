@@ -24,11 +24,11 @@ export default function Login() {
   const [senha, setSenha] = useState("");
   const [dept, setDept] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [lembrar, setLembrar] = useState(true);
+  const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
   const [aviso, setAviso] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErro("");
     setAviso("");
@@ -233,17 +233,7 @@ export default function Login() {
                 </label>
 
                 {/* OPÇÕES */}
-                <div className="flex items-center justify-between gap-4">
-                  <label className="flex cursor-pointer items-center gap-2.5 text-[12.5px] text-[#6B7080]">
-                    <input
-                      type="checkbox"
-                      checked={lembrar}
-                      onChange={(event) => setLembrar(event.target.checked)}
-                      className="h-4 w-4 accent-[#3D3F94]"
-                    />
-                    Lembrar de mim
-                  </label>
-
+                <div className="flex justify-end">
                   <button
                     type="button"
                     onClick={() => {
@@ -272,9 +262,10 @@ export default function Login() {
                 {/* ENTRAR */}
                 <button
                   type="submit"
-                  className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#3D3F94] text-[14px] font-semibold text-white shadow-lg shadow-[#3D3F94]/20 transition-all hover:-translate-y-0.5 hover:bg-[#2E3078]"
+                  disabled={enviando}
+                  className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#3D3F94] text-[14px] font-semibold text-white shadow-lg shadow-[#3D3F94]/20 transition-all hover:-translate-y-0.5 hover:bg-[#2E3078] disabled:cursor-wait disabled:opacity-70"
                 >
-                  Entrar
+                  {enviando ? "Entrando…" : "Entrar"}
                   <ArrowRight size={16} />
                 </button>
               </form>

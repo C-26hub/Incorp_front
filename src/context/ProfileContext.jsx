@@ -1,16 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-
-import { DEPARTMENTS } from '../data/agents'
-
-const KEY = 'incorp:profile'
-
-const DEFAULT_PROFILE = {
-  name: 'Ana Souza',
-  email: 'ana.souza@incorp.com.br',
-  role: 'Admin',
-  dept: 'Marketing',
-  photo: '', // imagem em base64 (data URL); vazio = mostra as iniciais
-}
+import { createContext, useCallback, useContext, useState } from 'react'
+import { useAuth } from './AuthContext'
 
 /** @type {import('react').Context<any>} */
 const ProfileContext = createContext(null)
@@ -23,31 +12,36 @@ export function getInitials(name = '') {
 }
 
 export function ProfileProvider({ children }) {
-  const [profile, setProfile] = useState(() => {
+  const { user } = useAuth()
+  const [photoState, setPhotoState] = useState({ userId: null, value: '' })
+  const photo = photoState.userId === user?.id ? photoState.value : (() => {
+    if (!user) return ''
     try {
-      const saved = JSON.parse(localStorage.getItem(KEY))
-      if (saved && typeof saved === 'object') {
-        const merged = { ...DEFAULT_PROFILE, ...saved }
-        if (!DEPARTMENTS.includes(merged.dept)) merged.dept = DEFAULT_PROFILE.dept
-        return merged
-      }
+      return localStorage.getItem(`incorp:profile:photo:${user.id}`) ?? ''
     } catch {
-      /* ignora dados corrompidos */
+      return ''
     }
-    return DEFAULT_PROFILE
-  })
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(profile))
-    } catch {
-      /* armazenamento cheio ou bloqueado: o perfil vale só nesta sessão */
-    }
-  }, [profile])
+  })()
 
   const updateProfile = useCallback((patch) => {
-    setProfile((current) => ({ ...current, ...patch }))
-  }, [])
+    if (!user) return
+    const nextPhoto = patch.photo ?? ''
+    setPhotoState({ userId: user.id, value: nextPhoto })
+    try {
+      if (nextPhoto) localStorage.setItem(`incorp:profile:photo:${user.id}`, nextPhoto)
+      else localStorage.removeItem(`incorp:profile:photo:${user.id}`)
+    } catch {
+      // A foto permanece disponível apenas durante esta sessão se o armazenamento falhar.
+    }
+  }, [user])
+
+  const profile = {
+    name: user ? `${user.name} ${user.surname}`.trim() : '',
+    email: user?.email ?? '',
+    role: user?.role === 'ADMINISTRATOR' ? 'Administrador' : 'Usuário',
+    dept: 'Incorp Tech',
+    photo,
+  }
 
   return (
     <ProfileContext.Provider value={{ profile, updateProfile }}>

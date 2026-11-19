@@ -4,10 +4,14 @@ import { historyOfDept } from '../data/agents'
 import Avatar from '../components/Avatar'
 import { useProfile } from '../context/ProfileContext'
 
-const statusStyle = {
-  Exportado: 'bg-[#f3e8ff] text-[#7e22ce]',
-  Salvo: 'bg-[#e6f8f0] text-[#0a9f63]',
-  Concluído: 'bg-[#e6f0ff] text-[#2563eb]',
+function formatDate(value) {
+  return new Date(value).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export default function History() {
@@ -65,8 +69,22 @@ export default function History() {
                 <td className="px-5 text-xs font-medium text-brand whitespace-nowrap cursor-pointer">Repetir →</td>
               </tr>
             ))}
-          </tbody>
-        </table>
+          </ul>
+        ) : conversations.length ? (
+          <div className="px-6 py-12 text-center">
+            <p className="text-sm font-medium">Nenhuma conversa encontrada</p>
+            <p className="mt-1 text-xs text-muted">Tente outro termo de busca.</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center px-6 py-14 text-center">
+            <MessageSquare size={24} className="text-muted" />
+            <p className="mt-3 text-sm font-medium">Nenhuma conversa ainda</p>
+            <p className="mt-1 text-xs text-muted">As conversas do agente de produção de conteúdo aparecerão aqui.</p>
+            <Link to="/agentes/copywriter" className="mt-4 rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white">
+              Criar conteúdo
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )

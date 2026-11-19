@@ -7,4 +7,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/csrf': 'http://localhost:8080',
+      '/auth': 'http://localhost:8080',
+      '/users': 'http://localhost:8080',
+      '/agents': 'http://localhost:8080',
+    },
+  },
 })

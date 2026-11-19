@@ -1,6 +1,8 @@
 import { Navigate, Outlet } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 export default function ProtectedRoute() {
-  const logged = localStorage.getItem('incorp:auth') === 'true'
-  return logged ? <Outlet /> : <Navigate to="/login" replace />
+  const { user, loading } = useAuth()
+  if (loading) return <div className="p-8 text-sm text-muted">Verificando sessão…</div>
+  return user ? <Outlet /> : <Navigate to="/login" replace />
 }

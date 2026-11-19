@@ -2,9 +2,11 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import incorpLogo from "../../assets/incorp-technology-logo.png";
+import { ApiError } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 import "../login/Login.css";
 
-type Campo = "name" | "cpf" | "email" | "role" | "password" | "confirmPassword";
+type Campo = "name" | "surname" | "cpf" | "email" | "password" | "confirmPassword";
 
 const campos: {
   key: Campo;
@@ -13,28 +15,30 @@ const campos: {
   placeholder: string;
   autoComplete: string;
 }[] = [
-  { key: "name", label: "Nome completo", type: "text", placeholder: "Digite seu nome", autoComplete: "name" },
+  { key: "name", label: "Nome", type: "text", placeholder: "Digite seu nome", autoComplete: "given-name" },
+  { key: "surname", label: "Sobrenome", type: "text", placeholder: "Digite seu sobrenome", autoComplete: "family-name" },
   { key: "cpf", label: "CPF", type: "text", placeholder: "000.000.000-00", autoComplete: "off" },
   { key: "email", label: "E-mail corporativo", type: "email", placeholder: "nome@incorp.com.br", autoComplete: "email" },
-  { key: "role", label: "Cargo", type: "text", placeholder: "Ex.: Analista de Marketing", autoComplete: "organization-title" },
   { key: "password", label: "Senha", type: "password", placeholder: "Mínimo de 6 caracteres", autoComplete: "new-password" },
   { key: "confirmPassword", label: "Confirmar senha", type: "password", placeholder: "Repita sua senha", autoComplete: "new-password" },
 ];
 
 export default function Cadastro() {
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [form, setForm] = useState<Record<Campo, string>>({
     name: "",
+    surname: "",
     cpf: "",
     email: "",
-    role: "",
     password: "",
     confirmPassword: "",
   });
 
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
+  const [enviando, setEnviando] = useState(false);
 
   function formatCpf(value: string) {
     const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -53,7 +57,7 @@ export default function Cadastro() {
     setSucesso(false);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErro("");
     setSucesso(false);
@@ -65,6 +69,10 @@ export default function Cadastro() {
 
     if (form.cpf.replace(/\D/g, "").length !== 11) {
       setErro("Informe um CPF com 11 dígitos.");
+      return;
+    }
+    if (form.cpf.replace(/\D/g, "").startsWith("0")) {
+      setErro("O cadastro atual não aceita CPF iniciado por zero. Entre em contato com o administrador.");
       return;
     }
 
@@ -83,10 +91,22 @@ export default function Cadastro() {
       return;
     }
 
-    // Apenas validação demonstrativa.
-    // Nenhuma conta é criada e nenhum dado é enviado.
-    setSucesso(true);
-    setTimeout(() => navigate("/login"), 1500);
+    setEnviando(true);
+    try {
+      await register({
+        name: form.name.trim(),
+        surname: form.surname.trim(),
+        cpf: Number(form.cpf.replace(/\D/g, "")),
+        email: form.email.trim(),
+        password: form.password,
+      });
+      setSucesso(true);
+      window.setTimeout(() => navigate("/login"), 1200);
+    } catch (error) {
+      setErro(error instanceof ApiError ? error.message : "Não foi possível criar a conta. Tente novamente.")
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -192,16 +212,16 @@ export default function Cadastro() {
 
                 {sucesso && (
                   <div role="status" className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-3 text-[12px] text-[#3D3F94]">
-                    Dados validados! O cadastro real será concluído quando
-                    integrarmos o servidor. Redirecionando para o login…
+                    Conta criada com sucesso. Redirecionando para o login…
                   </div>
                 )}
 
                 <button
                   type="submit"
-                  className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#3D3F94] text-[14px] font-semibold text-white hover:bg-[#2E3078]"
+                  disabled={enviando}
+                  className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#3D3F94] text-[14px] font-semibold text-white hover:bg-[#2E3078] disabled:cursor-wait disabled:opacity-70"
                 >
-                  Criar conta
+                  {enviando ? "Criando conta…" : "Criar conta"}
                   <ArrowRight size={16} />
                 </button>
               </form>
