@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { ProfileProvider } from './context/ProfileContext'
+import { ProfileProvider, useProfile } from './context/ProfileContext'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
@@ -17,6 +17,11 @@ import History from './pages/History'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
 
+function CommercialLeadsRoute() {
+  const { profile } = useProfile()
+  return profile.dept === 'Comercial' ? <LeadsWorkspace /> : <Navigate to="/agentes" replace />
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -31,7 +36,7 @@ export default function App() {
               <Route element={<AppLayout />}>
                 <Route path="/home" element={<Home />} />
                 <Route path="/agentes" element={<Agents />} />
-                <Route path="/agentes/lead" element={<LeadsWorkspace />} />
+                <Route path="/agentes/lead" element={<CommercialLeadsRoute />} />
                 <Route path="/agentes/seo" element={<SeoWorkspace />} />
                 <Route path="/agentes/social" element={<SocialWorkspace />} />
                 <Route path="/agentes/reports" element={<ReportsWorkspace />} />

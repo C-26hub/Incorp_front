@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link, useParams, Navigate } from 'react-router-dom'
-import { Plus, MessageSquare, Clock, ArrowLeft, Send, RotateCcw, Save, Download } from 'lucide-react'
-import { agents, historyOfDept } from '../data/agents'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { Plus, MessageSquare, Clock, ArrowLeft, Send, RotateCcw } from 'lucide-react'
+import { agents } from '../data/agents'
 import { useProfile } from '../context/ProfileContext'
+import { api } from '../services/api'
 
 const EMPTY_BRIEF = {
   objective: '',
@@ -57,10 +58,13 @@ function errorText(error) {
 
 export default function Workspace() {
   const { id } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const conversationId = searchParams.get('conversationId')
   const { profile } = useProfile()
   // só abre agentes do departamento da pessoa (vale também para quem digita a URL na mão)
   const agent = agents.find((a) => a.id === id && a.dept === profile.dept)
   const [messages, setMessages] = useState([])
+  const [conversations, setConversations] = useState([])
   const [brief, setBrief] = useState(EMPTY_BRIEF)
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
@@ -179,10 +183,12 @@ export default function Workspace() {
     if (instruction) void generate(instruction)
   }
 
-  // conversas anteriores: vêm do histórico do departamento da pessoa
-  const previous = historyOfDept(profile.dept)
-    .slice(0, 3)
-    .map((h) => ({ title: h.query, meta: `${h.agent} · ${h.date.slice(0, 5)}` }))
+  const onKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      send()
+    }
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] bg-slate-50">

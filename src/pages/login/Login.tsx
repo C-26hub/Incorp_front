@@ -12,12 +12,15 @@ import {
 } from "lucide-react";
 
 import incorpLogo from "../../assets/incorp-technology-logo.png";
+import { ApiError } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 import { useProfile } from "../../context/ProfileContext";
 import { DEPARTMENTS } from "../../data/agents";
 import "./Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const { updateProfile } = useProfile();
 
   const [email, setEmail] = useState("");
@@ -48,13 +51,16 @@ export default function Login() {
       return;
     }
 
-    // Demonstração: sem autenticação real.
-    // O departamento define quais agentes a pessoa vê (ver data/agents.jsx). Por enquanto é só
-    // interface: quando houver back-end, o departamento virá da conta e será validado lá.
-    updateProfile({ dept });
-    // Marca o usuário como "logado" para liberar as rotas internas (ProtectedRoute).
-    localStorage.setItem("incorp:auth", "true");
-    navigate("/home", { replace: true });
+    setEnviando(true);
+    try {
+      await login(email.trim(), senha);
+      updateProfile({ dept });
+      navigate("/home", { replace: true });
+    } catch (error) {
+      setErro(error instanceof ApiError ? error.message : "Não foi possível entrar. Tente novamente.");
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (

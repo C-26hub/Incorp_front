@@ -1,8 +1,20 @@
 import { createContext, useCallback, useContext, useState } from 'react'
 import { useAuth } from './AuthContext'
+import { DEPARTMENTS } from '../data/agents'
 
 /** @type {import('react').Context<any>} */
 const ProfileContext = createContext(null)
+const PROFILE_KEY = 'incorp:profile'
+
+function loadDepartment() {
+  try {
+    const savedProfile = JSON.parse(localStorage.getItem(PROFILE_KEY))
+    if (DEPARTMENTS.includes(savedProfile?.dept)) return savedProfile.dept
+  } catch {
+    // Ignora dados de perfil inválidos.
+  }
+  return 'Marketing'
+}
 
 export function getInitials(name = '') {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -13,6 +25,7 @@ export function getInitials(name = '') {
 
 export function ProfileProvider({ children }) {
   const { user } = useAuth()
+  const [dept, setDept] = useState(loadDepartment)
   const [photoState, setPhotoState] = useState({ userId: null, value: '' })
   const photo = photoState.userId === user?.id ? photoState.value : (() => {
     if (!user) return ''
@@ -24,14 +37,24 @@ export function ProfileProvider({ children }) {
   })()
 
   const updateProfile = useCallback((patch) => {
-    if (!user) return
-    const nextPhoto = patch.photo ?? ''
-    setPhotoState({ userId: user.id, value: nextPhoto })
-    try {
-      if (nextPhoto) localStorage.setItem(`incorp:profile:photo:${user.id}`, nextPhoto)
-      else localStorage.removeItem(`incorp:profile:photo:${user.id}`)
-    } catch {
-      // A foto permanece disponível apenas durante esta sessão se o armazenamento falhar.
+    if (patch.dept && DEPARTMENTS.includes(patch.dept)) {
+      setDept(patch.dept)
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify({ dept: patch.dept }))
+      } catch {
+        // O departamento selecionado continua disponível durante esta sessão.
+      }
+    }
+
+    if (user && Object.hasOwn(patch, 'photo')) {
+      const nextPhoto = patch.photo ?? ''
+      setPhotoState({ userId: user.id, value: nextPhoto })
+      try {
+        if (nextPhoto) localStorage.setItem(`incorp:profile:photo:${user.id}`, nextPhoto)
+        else localStorage.removeItem(`incorp:profile:photo:${user.id}`)
+      } catch {
+        // A foto continua disponível durante esta sessão se o armazenamento falhar.
+      }
     }
   }, [user])
 
@@ -39,7 +62,7 @@ export function ProfileProvider({ children }) {
     name: user ? `${user.name} ${user.surname}`.trim() : '',
     email: user?.email ?? '',
     role: user?.role === 'ADMINISTRATOR' ? 'Administrador' : 'Usuário',
-    dept: 'Incorp Tech',
+    dept,
     photo,
   }
 
