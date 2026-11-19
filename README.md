@@ -17,12 +17,11 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 
 | Tela | Descrição | Situação |
 | --- | --- | --- |
-| Login | Formulário de entrada e navegação para a aplicação | Demonstração, sem autenticação real |
+| Login | Formulário de entrada com escolha do **departamento** | Demonstração, sem autenticação real |
 | Cadastro | Formulário com validações no navegador | Demonstração, sem persistência no servidor |
 | Home | Visão inicial e acesso às funcionalidades | Implementada no Front-end |
-| Agentes | Catálogo com pesquisa e filtros | Implementada no Front-end |
-| Dashboard | Indicadores e gráficos | Dados demonstrativos |
-| Histórico | Listagem de atividades/conversas | Dados demonstrativos |
+| Agentes | Catálogo do departamento do usuário, com pesquisa e filtro de status | Implementada no Front-end |
+| Histórico | Interações do departamento do usuário | Dados demonstrativos |
 | Configurações | Interface de preferências | Integração/persistência pendentes |
 | Workspace (chat) | Conversa com o agente selecionado | Demonstração, resposta simulada |
 
@@ -36,6 +35,12 @@ O catálogo atual apresenta **10 agentes**, organizados em dois departamentos:
 
 As informações de status e quantidade de usos são **simuladas** nesta fase.
 
+### Acesso por departamento
+
+No login a pessoa escolhe o **departamento** (Marketing ou Comercial). A partir daí, **Home, Agentes, Workspace e Histórico mostram só o que pertence a esse departamento**, e abrir pela URL um agente de outro departamento redireciona para o catálogo.
+
+> Por enquanto isso é apenas interface (o departamento é escolhido no formulário e fica no `localStorage`). Quando houver Back-end, o departamento virá da conta do usuário e o acesso precisará ser validado no servidor.
+
 ## Tecnologias
 
 - **React** — construção das interfaces.
@@ -44,7 +49,6 @@ As informações de status e quantidade de usos são **simuladas** nesta fase.
 - **React Router** — navegação entre páginas.
 - **Tailwind CSS** — estilização e responsividade.
 - **Lucide React** — ícones.
-- **Recharts** — gráficos do Dashboard.
 
 ## Pré-requisitos
 
@@ -99,7 +103,6 @@ Incorp_front/
 │   │   ├── cadastro/
 │   │   ├── login/
 │   │   ├── Agents.jsx
-│   │   ├── Dashboard.jsx
 │   │   ├── History.jsx
 │   │   ├── Home.jsx
 │   │   └── Settings.jsx

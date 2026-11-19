@@ -1,3 +1,5 @@
+export const DEPARTMENTS = ['Marketing', 'Comercial']
+
 export const agents = [
   { id: 'copywriter', initials: 'CO', name: 'CopyWriter Pro', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', uses: 842, desc: 'Geração de textos para campanhas, posts e e-mails de marketing.' },
   { id: 'social', initials: 'SO', name: 'Social Planner', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Beta', uses: 388, desc: 'Planejamento e criação de calendário editorial para redes sociais.' },
@@ -21,21 +23,9 @@ export const history = [
   { agent: 'Campaign Insights', initials: 'CA', dept: 'Marketing', query: 'Análise campanha Google Ads — ...', date: '11/09/26 13:55', duration: '2m 41s', status: 'Salvo' },
 ]
 
-export const weekly = [
-  { day: 'Seg', Marketing: 47, Comercial: 62 },
-  { day: 'Ter', Marketing: 70, Comercial: 85 },
-  { day: 'Qua', Marketing: 90, Comercial: 73 },
-  { day: 'Qui', Marketing: 65, Comercial: 98 },
-  { day: 'Sex', Marketing: 82, Comercial: 113 },
-  { day: 'Sáb', Marketing: 35, Comercial: 40 },
-  { day: 'Dom', Marketing: 27, Comercial: 37 },
-]
-
-export const activity = [
-  { initials: 'AS', who: 'Ana Souza', action: 'gerou proposta via', agent: 'Proposal Builder', time: '2 min atrás' },
-  { initials: 'RL', who: 'Rafael Lima', action: 'iniciou análise com', agent: 'SEO Analyst', time: '7 min atrás' },
-  { initials: 'CT', who: 'Camila Torres', action: 'exportou resultado do', agent: 'CopyWriter Pro', time: '15 min atrás' },
-  { initials: 'BM', who: 'Bruno Melo', action: 'qualificou leads com', agent: 'Lead Qualifier', time: '28 min atrás' },
-]
-
 export const isMkt = (dept) => dept === 'Marketing'
+
+// Cada pessoa só enxerga os agentes (e o histórico) do próprio departamento.
+// ATENÇÃO: isto é só a interface. Quando houver back-end, a regra de acesso precisa ser validada lá.
+export const agentsOfDept = (dept) => agents.filter((a) => a.dept === dept)
+export const historyOfDept = (dept) => history.filter((h) => h.dept === dept)

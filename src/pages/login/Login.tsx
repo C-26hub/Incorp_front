@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  Building2,
+  ChevronDown,
   Eye,
   EyeOff,
   LockKeyhole,
@@ -10,13 +12,17 @@ import {
 } from "lucide-react";
 
 import incorpLogo from "../../assets/incorp-technology-logo.png";
+import { useProfile } from "../../context/ProfileContext";
+import { DEPARTMENTS } from "../../data/agents";
 import "./Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { updateProfile } = useProfile();
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [dept, setDept] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [lembrar, setLembrar] = useState(true);
   const [erro, setErro] = useState("");
@@ -37,7 +43,15 @@ export default function Login() {
       return;
     }
 
+    if (!DEPARTMENTS.includes(dept)) {
+      setErro("Selecione seu departamento.");
+      return;
+    }
+
     // Demonstração: sem autenticação real.
+    // O departamento define quais agentes a pessoa vê (ver data/agents.jsx). Por enquanto é só
+    // interface: quando houver back-end, o departamento virá da conta e será validado lá.
+    updateProfile({ dept });
     // Marca o usuário como "logado" para liberar as rotas internas (ProtectedRoute).
     localStorage.setItem("incorp:auth", "true");
     navigate("/home", { replace: true });
@@ -179,6 +193,42 @@ export default function Login() {
                         <Eye size={17} />
                       )}
                     </button>
+                  </span>
+                </label>
+
+                {/* DEPARTAMENTO */}
+                <label className="block">
+                  <span className="mb-2 block text-[12.5px] font-semibold text-[#3D4056]">
+                    Departamento
+                  </span>
+
+                  <span className="relative block">
+                    <Building2
+                      size={17}
+                      className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-[#9DA3B4]"
+                    />
+
+                    <select
+                      value={dept}
+                      onChange={(event) => setDept(event.target.value)}
+                      className={`h-12 w-full cursor-pointer appearance-none rounded-xl border border-[#DFE2EC] bg-[#F9FAFD] pr-11 pl-11 text-[14px] outline-none transition-all focus:border-[#3D3F94] focus:bg-white focus:ring-4 focus:ring-[#3D3F94]/10 ${
+                        dept ? "text-[#25263A]" : "text-[#ADB2C1]"
+                      }`}
+                    >
+                      <option value="" disabled>
+                        Selecione seu departamento
+                      </option>
+                      {DEPARTMENTS.map((nome) => (
+                        <option key={nome} value={nome} className="text-[#25263A]">
+                          {nome}
+                        </option>
+                      ))}
+                    </select>
+
+                    <ChevronDown
+                      size={17}
+                      className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-[#9DA3B4]"
+                    />
                   </span>
                 </label>
 

@@ -1,12 +1,11 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Settings, LogOut, Home, LayoutGrid, BarChart3 } from 'lucide-react'
+import { Settings, LogOut, Home, LayoutGrid } from 'lucide-react'
 import { useProfile } from '../context/ProfileContext'
 import UserAvatar from './UserAvatar'
 
 const links = [
   { to: '/home', label: 'Início', icon: Home },
   { to: '/agentes', label: 'Agentes', icon: LayoutGrid },
-  { to: '/dashboard', label: 'Dashboard', icon: BarChart3 },
 ]
 
 export default function AppLayout() {

@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
+import { DEPARTMENTS } from '../data/agents'
+
 const KEY = 'incorp:profile'
 
 const DEFAULT_PROFILE = {
@@ -10,6 +12,7 @@ const DEFAULT_PROFILE = {
   photo: '', // imagem em base64 (data URL); vazio = mostra as iniciais
 }
 
+/** @type {import('react').Context<any>} */
 const ProfileContext = createContext(null)
 
 export function getInitials(name = '') {
@@ -23,7 +26,11 @@ export function ProfileProvider({ children }) {
   const [profile, setProfile] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(KEY))
-      if (saved && typeof saved === 'object') return { ...DEFAULT_PROFILE, ...saved }
+      if (saved && typeof saved === 'object') {
+        const merged = { ...DEFAULT_PROFILE, ...saved }
+        if (!DEPARTMENTS.includes(merged.dept)) merged.dept = DEFAULT_PROFILE.dept
+        return merged
+      }
     } catch {
       /* ignora dados corrompidos */
     }

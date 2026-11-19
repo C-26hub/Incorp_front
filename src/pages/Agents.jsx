@@ -1,63 +1,46 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
-import { agents } from '../data/agents'
+import { agentsOfDept } from '../data/agents'
+import { useProfile } from '../context/ProfileContext'
 import AgentCard from '../components/AgentCard'
-
-const FILTERS = [
-  { key: 'todos', label: 'Todos' },
-  { key: 'marketing', label: 'Marketing' },
-  { key: 'comercial', label: 'Comercial' },
-]
-const VALID = FILTERS.map((f) => f.key)
-const DEPARTMENTS = ['Marketing', 'Comercial']
 
 export default function Agents() {
   const [params, setParams] = useSearchParams()
+  const { profile } = useProfile()
 
-  // filtro e busca vivem na URL: /agentes?filtro=comercial&busca=seo
-  const raw = params.get('filtro')
-  const filter = VALID.includes(raw) ? raw : 'todos'
+  // a busca vive na URL: /agentes?busca=seo
   const query = params.get('busca') ?? ''
-
   const [status, setStatus] = useState('todos')
 
-  // atualiza só os parâmetros informados, preservando os outros
-  const updateParams = (patch) => {
+  const setQuery = (value) => {
     const next = new URLSearchParams(params)
-    Object.entries(patch).forEach(([key, value]) => {
-      if (value) next.set(key, value)
-      else next.delete(key)
-    })
+    if (value) next.set('busca', value)
+    else next.delete('busca')
     setParams(next, { replace: true })
   }
 
-  const setFilter = (key) => updateParams({ filtro: key === 'todos' ? '' : key })
-  const setQuery = (value) => updateParams({ busca: value })
+  // só os agentes do departamento da pessoa
+  const disponiveis = useMemo(() => agentsOfDept(profile.dept), [profile.dept])
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return agents.filter((a) => {
-      if (filter === 'marketing' && a.dept !== 'Marketing') return false
-      if (filter === 'comercial' && a.dept !== 'Comercial') return false
+    return disponiveis.filter((a) => {
       if (status !== 'todos' && a.status !== status) return false
-      if (q && !`${a.name} ${a.desc} ${a.category} ${a.dept}`.toLowerCase().includes(q)) return false
+      if (q && !`${a.name} ${a.desc} ${a.category}`.toLowerCase().includes(q)) return false
       return true
     })
-  }, [filter, status, query])
+  }, [disponiveis, status, query])
 
-  // departamento -> categoria -> agentes
-  const grouped = useMemo(() => {
+  // categoria -> agentes
+  const byCategory = useMemo(() => {
     const out = {}
     visible.forEach((a) => {
-      out[a.dept] ??= {}
-      out[a.dept][a.category] ??= []
-      out[a.dept][a.category].push(a)
+      out[a.category] ??= []
+      out[a.category].push(a)
     })
     return out
   }, [visible])
-
-  const departments = DEPARTMENTS.filter((d) => grouped[d])
 
   return (
     <div>
@@ -65,7 +48,7 @@ export default function Agents() {
         <div>
           <h1 className="text-[26px] font-medium">Exploração de Agentes</h1>
           <p className="mt-1 text-xs text-accent">
-            {agents.length} agentes disponíveis em {DEPARTMENTS.length} departamentos
+            {disponiveis.length} agentes disponíveis para {profile.dept}
           </p>
         </div>
 
@@ -93,45 +76,22 @@ export default function Agents() {
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar agentes">
-        {FILTERS.map((f) => {
-          const active = filter === f.key
-          return (
-            <button
-              key={f.key}
-              role="tab"
-              aria-selected={active}
-              onClick={() => setFilter(f.key)}
-              className={`flex h-9 items-center gap-1.5 rounded-lg border px-4 text-xs font-medium transition ${
-                active
-                  ? 'border-brand bg-brand text-white'
-                  : 'border-line bg-white hover:border-brand/40'
-              }`}
-            >
-              {f.label}
-            </button>
-          )
-        })}
-      </div>
-
-      {departments.length === 0 && (
+      {visible.length === 0 && (
         <div className="mt-16 flex flex-col items-center text-center">
           <p className="text-sm font-medium">Nenhum agente encontrado</p>
-          <p className="mt-1 text-xs text-muted">Altere a busca, o filtro ou o status.</p>
+          <p className="mt-1 text-xs text-muted">Altere a busca ou o status.</p>
         </div>
       )}
 
-      {departments.map((dept) => (
-        <section key={dept} className="mt-8">
+      {visible.length > 0 && (
+        <section className="mt-8">
           <h2 className="flex items-center gap-2 text-sm font-medium">
-            <span className={`h-2 w-2 rounded-full ${dept === 'Marketing' ? 'bg-accent' : 'bg-brand'}`} />
-            {dept}
-            <span className="text-xs font-normal text-muted">
-              {Object.values(grouped[dept]).flat().length} agentes
-            </span>
+            <span className={`h-2 w-2 rounded-full ${profile.dept === 'Marketing' ? 'bg-accent' : 'bg-brand'}`} />
+            {profile.dept}
+            <span className="text-xs font-normal text-muted">{visible.length} agentes</span>
           </h2>
 
-          {Object.entries(grouped[dept]).map(([category, list]) => (
+          {Object.entries(byCategory).map(([category, list]) => (
             <div key={category} className="mt-4">
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted">{category}</p>
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -142,7 +102,7 @@ export default function Agents() {
             </div>
           ))}
         </section>
-      ))}
+      )}
     </div>
   )
 }

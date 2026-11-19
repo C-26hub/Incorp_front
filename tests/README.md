@@ -29,14 +29,19 @@ Os testes verificam o comportamento da interface e a navegação entre telas, ut
 | --- | --- | --- |
 | QA-001 | Página de login | A tela de login é exibida. |
 | QA-002 | Página de cadastro | A tela de cadastro é exibida. |
-| QA-004 | Catálogo de agentes | A lista de agentes é apresentada. |
+| QA-004 | Catálogo de agentes | O usuário vê os agentes do próprio departamento (padrão: Marketing) e nenhum de outro. |
 | QA-005 | Pesquisa de agentes | A pesquisa filtra os agentes exibidos. |
-| QA-006 | Filtro por departamento | A seleção de departamento atualiza os agentes exibidos. |
+| QA-006 | Agentes do departamento | Um usuário de Comercial vê os agentes de Comercial e nenhum de Marketing. |
 | QA-007 | Abrir Workspace | Um agente abre seu Workspace na rota correspondente. |
 | QA-008 | Enviar mensagem demonstrativa | A mensagem enviada aparece na conversa e recebe resposta simulada. |
 | QA-009 | Nova conversa | A ação reinicia a conversa demonstrativa. |
 | QA-010 | Voltar aos agentes | O retorno leva ao catálogo de agentes. |
 | QA-015 | Rota inexistente | Uma rota desconhecida redireciona para o login. |
+| QA-016 | Login com departamento | Escolher o departamento no login leva à Home e define quais agentes aparecem. |
+| QA-017 | Login exige departamento | Sem escolher o departamento, o login mostra erro e permanece na tela. |
+| QA-018 | Agente de outro departamento | Abrir pela URL um agente de outro departamento redireciona para o catálogo. |
+| QA-019 | Histórico do departamento | O histórico mostra só interações com agentes do departamento. |
+| QA-020 | Dashboard removido | `/dashboard` não existe mais e redireciona para o login. |
 
 A numeração preserva os identificadores dos cenários planejados; por isso há intervalos entre alguns IDs.
 
@@ -148,7 +153,7 @@ Esta bateria cobre fluxos funcionais básicos da interface em **Chromium desktop
 ## Próximas etapas de QA
 
 1. Validar os formulários de login e cadastro, incluindo mensagens de erro.
-2. Ampliar a cobertura para Dashboard, Histórico e Configurações.
+2. Ampliar a cobertura para Histórico e Configurações.
 3. Adicionar testes responsivos para telas móveis.
 4. Adicionar verificações básicas de acessibilidade.
 5. Integrar os testes ao pipeline de CI após alinhamento com a equipe.

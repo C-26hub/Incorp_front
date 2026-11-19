@@ -7,7 +7,6 @@ import Cadastro from './pages/cadastro/Cadastro'
 import Home from './pages/Home'
 import Agents from './pages/Agents'
 import Workspace from './pages/Workspace'
-import Dashboard from './pages/Dashboard'
 import History from './pages/History'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
@@ -26,7 +25,6 @@ export default function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/agentes" element={<Agents />} />
               <Route path="/agentes/:id" element={<Workspace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/historico" element={<History />} />
               <Route path="/configuracoes" element={<Settings />} />
               <Route path="/perfil" element={<Profile />} />
