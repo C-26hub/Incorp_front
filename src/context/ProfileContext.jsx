@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useState } from 'react'
 import { useAuth } from './AuthContext'
 
+/** @type {import('react').Context<any>} */
 const ProfileContext = createContext(null)
 
 export function getInitials(name = '') {

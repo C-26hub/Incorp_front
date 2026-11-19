@@ -44,6 +44,12 @@ O catálogo apresenta os oito agentes priorizados para o projeto:
 7. Editais e Licitações — em breve
 8. Apoio Comercial — em breve
 
+### Acesso por departamento
+
+No login a pessoa escolhe o **departamento** (Marketing ou Comercial). A partir daí, **Home, Agentes, Workspace e Histórico mostram só o que pertence a esse departamento**, e abrir pela URL um agente de outro departamento redireciona para o catálogo.
+
+> Por enquanto isso é apenas interface (o departamento é escolhido no formulário e fica no `localStorage`). Quando houver Back-end, o departamento virá da conta do usuário e o acesso precisará ser validado no servidor.
+
 ## Tecnologias
 
 - **React** — construção das interfaces.

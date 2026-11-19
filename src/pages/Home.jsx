@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { Search, Phone, Activity } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Search, Megaphone, Briefcase } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { agents } from '../data/agents'
+import { agentsOfDept } from '../data/agents'
 import Avatar from '../components/Avatar'
 import StatusBadge from '../components/StatusBadge'
 import { useProfile } from '../context/ProfileContext'
@@ -13,16 +13,19 @@ function greeting() {
   return 'Boa noite'
 }
 
-const top = agents.filter((agent) => agent.available)
-
-const departments = [
-  { name: 'Marketing', to: '/agentes?filtro=marketing', icon: Phone, bg: 'bg-accent-soft text-accent' },
-  { name: 'Comercial', to: '/agentes?filtro=comercial', icon: Activity, bg: 'bg-[#eeeff6] text-brand' },
-]
+const DEPT_VISUAL = {
+  Marketing: { icon: Megaphone, bg: 'bg-accent-soft text-accent' },
+  Comercial: { icon: Briefcase, bg: 'bg-[#eeeff6] text-brand' },
+}
 
 export default function Home() {
   const { profile } = useProfile()
   const firstName = profile.name.trim().split(/\s+/)[0]
+
+  // só os agentes do departamento da pessoa
+  const disponiveis = useMemo(() => agentsOfDept(profile.dept), [profile.dept])
+  const top = useMemo(() => [...disponiveis].sort((a, b) => b.uses - a.uses).slice(0, 5), [disponiveis])
+  const { icon: DeptIcon, bg: deptBg } = DEPT_VISUAL[profile.dept]
 
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
@@ -35,7 +38,7 @@ export default function Home() {
 
   return (
     <div>
-      <h1 className="text-[28px] font-medium">{greeting()}, {firstName} 👋</h1>
+      <h1 className="text-[28px] font-medium">{greeting()}, {firstName}!</h1>
       <p className="text-sm text-muted mt-1">O que você quer automatizar hoje?</p>
 
       <form onSubmit={onSearch} role="search" className="relative mt-8">
@@ -43,31 +46,24 @@ export default function Home() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar agentes, funções ou departamentos..."
+          placeholder="Buscar agentes ou funções..."
           aria-label="Buscar agentes"
           className="w-full h-[52px] pl-11 pr-4 rounded-xl bg-white border border-line shadow-sm text-sm outline-none focus:border-brand"
         />
       </form>
 
-      <div className="grid grid-cols-1 gap-5 mt-8 sm:grid-cols-2">
-        {departments.map(({ name, to, icon: Icon, bg }) => (
-          <Link
-            key={name}
-            to={to}
-            className="bg-white border border-line rounded-2xl p-5 h-[128px] flex flex-col justify-between hover:shadow-md transition-shadow"
-          >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${bg}`}>
-              <Icon size={18} />
-            </div>
-            <div>
-              <p className="text-[15px] font-medium">{name}</p>
-              <p className="text-xs text-muted mt-0.5">
-                {agents.filter((a) => a.dept === name && a.available).length} agentes disponíveis
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
+      <Link
+        to="/agentes"
+        className="mt-8 bg-white border border-line rounded-2xl p-5 h-[128px] flex flex-col justify-between hover:shadow-md transition-shadow"
+      >
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${deptBg}`}>
+          <DeptIcon size={18} />
+        </div>
+        <div>
+          <p className="text-[15px] font-medium">{profile.dept}</p>
+          <p className="text-xs text-muted mt-0.5">{disponiveis.length} agentes disponíveis</p>
+        </div>
+      </Link>
 
       <div className="flex items-center justify-between mt-10 mb-4">
         <h2 className="text-base font-medium">Agentes mais utilizados</h2>

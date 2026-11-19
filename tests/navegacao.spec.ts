@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test'
+
+import { test, expect, type Page } from '@playwright/test'
 
 const authenticatedUser = {
   id: 'user-test',
@@ -154,6 +155,11 @@ test.beforeEach(async ({ page }) => {
   }))
 })
 
+// Sem perfil salvo, o departamento padrão é Marketing. Para testar outro, defina antes de abrir a página.
+async function comoDepartamento(page: Page, dept: 'Marketing' | 'Comercial') {
+  await page.addInitScript((d) => localStorage.setItem('incorp:profile', JSON.stringify({ dept: d })), dept)
+}
+
 test('QA-001 - Página de login', async ({ page }) => {
   await page.goto('/login')
   await expect(page).toHaveURL(/\/login$/)
@@ -195,10 +201,10 @@ test('QA-003 - Login usa a API e abre a área autenticada', async ({ page }) => 
 
 test('QA-004 - Catálogo marca os agentes não implementados', async ({ page }) => {
   await page.goto('/agentes')
-  await expect(page.getByText('Agente de Produção de Conteúdo').first()).toBeVisible()
-  await expect(page.getByText('Agente de Prospecção e Qualificação de Leads').first()).toBeVisible()
-  await expect(page.getByText('Agente de Mídias Sociais').first()).toBeVisible()
-  await expect(page.getByText('6 agentes disponíveis · 2 em breve')).toBeVisible()
+
+  // departamento padrão (Marketing): vê os agentes de Marketing e nenhum de Comercial
+  await expect(page.getByText('CopyWriter Pro').first()).toBeVisible()
+  await expect(page.getByText('Lead Qualifier')).toHaveCount(0)
 })
 
 test('QA-005 - Pesquisa de agentes', async ({ page }) => {
@@ -208,11 +214,12 @@ test('QA-005 - Pesquisa de agentes', async ({ page }) => {
   await expect(page.getByText('Agente de Produção de Conteúdo')).toHaveCount(0)
 })
 
-test('QA-006 - Filtro por departamento', async ({ page }) => {
+test('QA-006 - Agentes do departamento', async ({ page }) => {
+  await comoDepartamento(page, 'Comercial')
   await page.goto('/agentes')
-  await page.getByRole('tab', { name: 'Comercial', exact: true }).click()
-  await expect(page.getByText('Agente de Prospecção e Qualificação de Leads').first()).toBeVisible()
-  await expect(page.getByText('Agente de Produção de Conteúdo')).toHaveCount(0)
+
+  await expect(page.getByText('Proposal Builder').first()).toBeVisible()
+  await expect(page.getByText('CopyWriter Pro')).toHaveCount(0)
 })
 
 test('QA-007 - Workspace pede briefing antes de gerar conteúdo', async ({ page }) => {
@@ -496,5 +503,53 @@ test('QA-019 - Agente de Tráfego envia briefing e exibe rascunho', async ({ pag
 test('QA-020 - Rota protegida redireciona quando a sessão expira', async ({ page }) => {
   await page.route('**/auth/me', (route) => route.fulfill({ status: 401, body: 'Unauthorized' }))
   await page.goto('/agentes')
+  await expect(page).toHaveURL(/\/login$/)
+})
+
+test('QA-016 - Login com departamento', async ({ page }) => {
+  await page.goto('/login')
+
+  await page.getByPlaceholder('nome@incorp.com.br').fill('teste@incorp.com.br')
+  await page.getByPlaceholder('Digite sua senha').fill('123456')
+  await page.getByLabel('Departamento').selectOption('Comercial')
+  await page.getByRole('button', { name: 'Entrar' }).click()
+
+  await expect(page).toHaveURL(/\/home$/)
+
+  await page.goto('/agentes')
+  await expect(page.getByText('Proposal Builder').first()).toBeVisible()
+  await expect(page.getByText('CopyWriter Pro')).toHaveCount(0)
+})
+
+test('QA-017 - Login exige departamento', async ({ page }) => {
+  await page.goto('/login')
+
+  await page.getByPlaceholder('nome@incorp.com.br').fill('teste@incorp.com.br')
+  await page.getByPlaceholder('Digite sua senha').fill('123456')
+  await page.getByRole('button', { name: 'Entrar' }).click()
+
+  await expect(page.getByText('Selecione seu departamento.')).toBeVisible()
+  await expect(page).toHaveURL(/\/login$/)
+})
+
+test('QA-018 - Agente de outro departamento não abre pela URL', async ({ page }) => {
+  // usuário de Marketing tentando abrir um agente de Comercial
+  await page.goto('/agentes/proposal')
+
+  await expect(page).toHaveURL(/\/agentes$/)
+  await expect(page.getByText('Proposal Builder')).toHaveCount(0)
+})
+
+test('QA-019 - Histórico do departamento', async ({ page }) => {
+  await comoDepartamento(page, 'Comercial')
+  await page.goto('/historico')
+
+  await expect(page.getByText('Proposal Builder').first()).toBeVisible()
+  await expect(page.getByText('CopyWriter Pro')).toHaveCount(0)
+})
+
+test('QA-020 - Dashboard foi removido', async ({ page }) => {
+  await page.goto('/dashboard')
+
   await expect(page).toHaveURL(/\/login$/)
 })

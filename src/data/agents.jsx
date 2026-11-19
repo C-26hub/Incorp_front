@@ -1,12 +1,31 @@
+export const DEPARTMENTS = ['Marketing', 'Comercial']
+
 export const agents = [
-  { id: 'copywriter', initials: 'CO', name: 'Agente de Produção de Conteúdo', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', available: true, desc: 'Geração de rascunhos para campanhas, posts e e-mails de marketing.' },
-  { id: 'lead', initials: 'LE', name: 'Agente de Prospecção e Qualificação de Leads', dept: 'Comercial', category: 'Vendas', status: 'Online', available: true, desc: 'Organize leads e avalie a aderência ao perfil ideal de cliente.' },
-  { id: 'seo', initials: 'SE', name: 'Agente de SEO', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', available: true, desc: 'Auditoria on-page de páginas publicadas e recomendações práticas de otimização.' },
-  { id: 'social', initials: 'SO', name: 'Agente de Mídias Sociais', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', available: true, desc: 'Valide regras de publicação, calendário aprovado e pendências antes de simular o agendamento.' },
-  { id: 'reports', initials: 'RE', name: 'Agente de Relatórios e KPIs', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', available: true, desc: 'Consolide indicadores informados, compare com metas e identifique lacunas ou divergências.' },
-  { id: 'traffic', initials: 'TR', name: 'Agente de Tráfego', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', available: true, desc: 'Estruture um rascunho de campanha paga e calcule métricas a partir de dados informados.' },
-  { id: 'tenders', initials: 'ED', name: 'Agente de Editais e Licitações', dept: 'Comercial', category: 'Vendas', status: 'Em breve', available: false, desc: 'Apoio à análise de editais e processos de licitação.' },
-  { id: 'commercial', initials: 'AC', name: 'Agente de Apoio Comercial', dept: 'Comercial', category: 'Vendas', status: 'Em breve', available: false, desc: 'Apoio em negociação e fechamento comercial.' },
+  { id: 'copywriter', initials: 'CO', name: 'CopyWriter Pro', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', uses: 842, desc: 'Geração de textos para campanhas, posts e e-mails de marketing.' },
+  { id: 'social', initials: 'SO', name: 'Social Planner', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Beta', uses: 388, desc: 'Planejamento e criação de calendário editorial para redes sociais.' },
+  { id: 'brand', initials: 'BR', name: 'Brand Voice', dept: 'Marketing', category: 'Criação de Conteúdo', status: 'Online', uses: 295, desc: 'Revisão e adequação de conteúdos ao tom de voz da marca Incorp.' },
+  { id: 'seo', initials: 'SE', name: 'SEO Analyst', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', uses: 617, desc: 'Análise de palavras-chave, sugestões de otimização e relatórios de posicionamento.' },
+  { id: 'campaign', initials: 'CA', name: 'Campaign Insights', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', uses: 451, desc: 'Análise de performance de campanhas e geração de insights acionáveis.' },
+  { id: 'proposal', initials: 'PR', name: 'Proposal Builder', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 973, desc: 'Criação automática de propostas comerciais personalizadas por cliente.' },
+  { id: 'lead', initials: 'LE', name: 'Lead Qualifier', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 756, desc: 'Qualificação automática de leads com base em critérios de ICP.' },
+  { id: 'pricing', initials: 'PR', name: 'Pricing Assistant', dept: 'Comercial', category: 'Vendas', status: 'Online', uses: 534, desc: 'Sugestões de precificação com base em margem, concorrência e histórico.' },
+  { id: 'followup', initials: 'FO', name: 'Follow-up Engine', dept: 'Comercial', category: 'Relacionamento', status: 'Beta', uses: 312, desc: 'Sugestão e automação de sequências de follow-up para oportunidades abertas.' },
+  { id: 'contract', initials: 'CO', name: 'Contract Reviewer', dept: 'Comercial', category: 'Jurídico & Contratos', status: 'Online', uses: 198, desc: 'Revisão de contratos comerciais com alertas de cláusulas sensíveis.' },
+]
+
+export const history = [
+  { agent: 'Proposal Builder', initials: 'PR', dept: 'Comercial', query: 'Proposta para Grupo Renova — P...', date: '15/09/26 14:30', duration: '1m 12s', status: 'Exportado' },
+  { agent: 'CopyWriter Pro', initials: 'CO', dept: 'Marketing', query: 'E-mail marketing campanha Sete...', date: '15/09/26 11:05', duration: '0m 48s', status: 'Salvo' },
+  { agent: 'Lead Qualifier', initials: 'LE', dept: 'Comercial', query: 'Qualificação lote 24 leads — Link...', date: '14/09/26 16:22', duration: '2m 03s', status: 'Concluído' },
+  { agent: 'SEO Analyst', initials: 'SE', dept: 'Marketing', query: 'Auditoria palavras-chave — blog ...', date: '14/09/26 09:47', duration: '1m 35s', status: 'Salvo' },
+  { agent: 'Social Planner', initials: 'SO', dept: 'Marketing', query: 'Calendário editorial Outubro — Li...', date: '13/09/26 15:10', duration: '0m 57s', status: 'Concluído' },
+  { agent: 'Follow-up Engine', initials: 'FO', dept: 'Comercial', query: 'Sequência follow-up — oportunid...', date: '12/09/26 10:38', duration: '1m 22s', status: 'Exportado' },
+  { agent: 'Campaign Insights', initials: 'CA', dept: 'Marketing', query: 'Análise campanha Google Ads — ...', date: '11/09/26 13:55', duration: '2m 41s', status: 'Salvo' },
 ]
 
 export const isMkt = (dept) => dept === 'Marketing'
+
+// Cada pessoa só enxerga os agentes (e o histórico) do próprio departamento.
+// ATENÇÃO: isto é só a interface. Quando houver back-end, a regra de acesso precisa ser validada lá.
+export const agentsOfDept = (dept) => agents.filter((a) => a.dept === dept)
+export const historyOfDept = (dept) => history.filter((h) => h.dept === dept)
