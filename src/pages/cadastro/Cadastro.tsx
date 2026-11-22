@@ -67,15 +67,11 @@ export default function Cadastro() {
       return;
     }
 
-    if (form.cpf.replace(/\D/g, "").length !== 11) {
+    const cpf = form.cpf.replace(/\D/g, "");
+    if (cpf.length !== 11) {
       setErro("Informe um CPF com 11 dígitos.");
       return;
     }
-    if (form.cpf.replace(/\D/g, "").startsWith("0")) {
-      setErro("O cadastro atual não aceita CPF iniciado por zero. Entre em contato com o administrador.");
-      return;
-    }
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setErro("Informe um e-mail válido.");
       return;
@@ -96,7 +92,7 @@ export default function Cadastro() {
       await register({
         name: form.name.trim(),
         surname: form.surname.trim(),
-        cpf: Number(form.cpf.replace(/\D/g, "")),
+        cpf,
         email: form.email.trim(),
         password: form.password,
       });

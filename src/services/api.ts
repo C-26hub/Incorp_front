@@ -350,7 +350,7 @@ export const api = {
   register: (input: {
     name: string
     surname: string
-    cpf: number
+    cpf: string
     email: string
     password: string
   }) =>
