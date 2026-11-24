@@ -5,9 +5,9 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-frontend-3178c6)
 ![Vite](https://img.shields.io/badge/Vite-build-646cff)
 
-Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O frontend integra autenticação, cadastro, histórico e seis agentes à API Spring Boot.
+Interface web para explorar e utilizar agentes de inteligência artificial voltados aos departamentos de **Marketing** e **Comercial**. O frontend integra autenticação, cadastro, histórico e oito agentes à API Spring Boot.
 
-> **Estado atual:** Produção de Conteúdo, Prospecção e Qualificação de Leads, SEO, Mídias Sociais, Relatórios e KPIs e Tráfego estão integrados. Editais e Licitações e Apoio Comercial continuam “Em breve”.
+> **Estado atual:** os oito agentes do catálogo estão integrados à API: Produção de Conteúdo, Prospecção e Qualificação de Leads, SEO, Mídias Sociais, Relatórios e KPIs, Tráfego, Editais e Licitações e Apoio Comercial.
 
 ## Visão geral
 
@@ -21,7 +21,7 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 | Cadastro | Criação de conta que aguarda atribuição de departamento | Integrado |
 | Usuários | Atribuição de departamento às contas comuns | Disponível para administradores |
 | Home | Acesso aos agentes disponíveis no departamento selecionado | Integrada ao catálogo |
-| Agentes | Catálogo com pesquisa, status e categorias | Seis agentes disponíveis e dois em breve |
+| Agentes | Catálogo com pesquisa, status e categorias | Oito agentes disponíveis |
 | Histórico | Conversas do agente de conteúdo | Integrado ao backend |
 | Configurações | Preferências de interface | Armazenamento local no navegador |
 | Workspace de conteúdo | Geração e continuação de conteúdo | Integrado; revisão humana necessária |
@@ -30,12 +30,16 @@ A plataforma reúne agentes especializados em uma interface única, permitindo q
 | Mídias Sociais | Validação de legenda, regras fornecidas e horários | Simulação; não consulta calendários ou regras oficiais nem publica/agendas conteúdo |
 | Relatórios e KPIs | Consolidação de indicadores, fontes e metas | Valores informados pelo usuário; síntese narrativa opcional via IA |
 | Tráfego | Plano de campanha, orçamento, metas e métricas | Rascunho e recomendações; não acessa nem altera contas de anúncios |
+| Editais e Licitações | Checklist de habilitação, prazos, riscos e parecer do edital informado | Análise auxiliar; não consulta bases externas, não publica e não promete vitória |
+| Apoio Comercial | Estratégia de pitch, objeções, diferenciais e próximo passo da oportunidade | Direcionamento auxiliar; não contata clientes e não promete fechamento |
 
 O CSV aceita separador por vírgula ou ponto e vírgula, até 100 registros por arquivo e cabeçalhos em português ou inglês. A coluna de nome é obrigatória; por exemplo: `nome,empresa,cargo,email,setor,porte,localizacao,observacoes`. A qualificação envia ao Gemini o ICP e os dados de empresa, cargo, setor, porte, localização e observações; nome e dados de contato não são enviados.
 
 A auditoria de SEO coleta metadados e sinais on-page da página pública no momento da solicitação. O resultado é orientativo e não representa promessa de posicionamento nos buscadores. Informe apenas páginas e contextos que possam ser processados pelo provedor de IA; evite dados pessoais ou confidenciais.
 
 A validação de Mídias Sociais compara a publicação com as regras, versões de marca e horários informados pelo usuário; não há integração com redes sociais ou calendário externo. Relatórios usam observações fornecidas pela equipe, e não buscam dados diretamente nas plataformas. O agente de Tráfego também trabalha somente com o briefing e os dados fornecidos; campanhas e estratégias devem ser revisadas antes de qualquer execução.
+
+Editais e Licitações recebe o edital informado pela equipe — identificador, órgão, modalidade, prazos, orçamento, requisitos e documentos de habilitação — e devolve alertas, checklist e, quando a análise não indica risco alto, um parecer para a proposta. Apoio Comercial recebe a oportunidade, as dores, os concorrentes e as objeções e devolve a narrativa de pitch, os ângulos de contorno e o próximo passo. Os dois resultados são auxiliares: uma pessoa deve revisá-los antes de proposta, negociação ou decisão. Nenhum dos agentes publica conteúdo, consulta bases externas ou entra em contato com clientes.
 
 ## Catálogo de agentes
 
@@ -47,8 +51,8 @@ O catálogo apresenta os oito agentes priorizados para o projeto:
 4. Mídias Sociais — disponível
 5. Relatórios e KPIs — disponível
 6. Tráfego — disponível
-7. Editais e Licitações — em breve
-8. Apoio Comercial — em breve
+7. Editais e Licitações — disponível
+8. Apoio Comercial — disponível
 
 ### Acesso por departamento
 
@@ -128,7 +132,7 @@ npx playwright install chromium
 npx playwright test
 ```
 
-Os testes simulam as respostas da API e cobrem navegação, autenticação de interface, catálogo e fluxos dos seis agentes; eles não substituem testes de integração com o backend ou chamadas reais ao Gemini. O relatório HTML é salvo em `qa-report/`. Se a porta padrão estiver ocupada, defina `PLAYWRIGHT_PORT` ao executar a suíte.
+Os testes simulam as respostas da API e cobrem navegação, autenticação de interface, catálogo e fluxos dos oito agentes; eles não substituem testes de integração com o backend ou chamadas reais ao Gemini. O relatório HTML é salvo em `qa-report/`. Se a porta padrão estiver ocupada, defina `PLAYWRIGHT_PORT` ao executar a suíte.
 
 Para visualizar localmente a versão compilada:
 
@@ -179,10 +183,9 @@ O Front-end coleta as entradas do usuário e apresenta os resultados. O Back-end
 
 ## Itens ainda não implementados e próximos passos
 
-1. Implementar os agentes de Editais e Licitações e Apoio Comercial.
-2. Implementar recuperação de senha e edição de dados da conta.
-3. Aplicar e validar permissões por departamento no backend e completar as verificações de acesso das telas.
-4. Ampliar testes de integração, acessibilidade e cobertura responsiva.
+1. Implementar recuperação de senha e edição de dados da conta.
+2. Aplicar e validar permissões por departamento no backend e completar as verificações de acesso das telas.
+3. Ampliar testes de integração, acessibilidade e cobertura responsiva.
 
 ## Colaboração
 
@@ -206,6 +209,6 @@ Antes de executar `git add .`, revise o `git status` e certifique-se de não inc
 
 ---
 
-**Escopo atual:** seis agentes disponíveis, dois em breve e 25 testes automatizados de interface com respostas simuladas da API.
+**Escopo atual:** oito agentes disponíveis e testes automatizados de interface com respostas simuladas da API, incluindo Editais e Licitações e Apoio Comercial.
 
 **Incorp AI** — Projeto em evolução, desenvolvido por estudantes para fins acadêmicos

@@ -40,6 +40,10 @@ Para obter o resultado atualizado, execute `npx playwright test`; o relatório H
 | QA-023 | Acesso a agente de outro departamento | Uma rota direta é redirecionada ao catálogo. |
 | QA-024 | Histórico | O histórico exibe conversas fornecidas pela API, sem dados fictícios. |
 | QA-025 | Dashboard removido | `/dashboard` não existe mais e redireciona para o login. |
+| QA-026 | Editais e Licitações | O edital é aberto pela Home e pelo catálogo; o POST segue o contrato e o parecer é exibido. |
+| QA-027 | Apoio Comercial | A oportunidade é aberta pela Home e pelo catálogo; a estratégia e as objeções são exibidas. |
+| QA-028 | Agentes comerciais por URL | Um usuário de Marketing é enviado de volta ao catálogo. |
+| QA-029 | Prazo do edital | Um prazo posterior à abertura é recusado antes de chamar a API. |
 
 ## Estrutura de arquivos
 
@@ -149,4 +153,4 @@ Esta bateria cobre fluxos funcionais básicos da interface em **Chromium desktop
 
 ---
 
-**Escopo atual:** 25 cenários funcionais com respostas simuladas da API; consulte a execução mais recente do Playwright para o resultado.
+**Escopo atual:** cenários funcionais com respostas simuladas da API, incluindo Editais e Licitações e Apoio Comercial; consulte a execução mais recente do Playwright para o resultado.

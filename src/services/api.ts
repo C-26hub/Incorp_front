@@ -227,6 +227,95 @@ export type TrafficCampaignResponse = {
   } | null
 }
 
+export type BidModality =
+  | 'PREGAO_ELETRONICO'
+  | 'CONCORRENCIA'
+  | 'DISPENSA'
+  | 'INEXIGIBILIDADE'
+  | 'DIALOGO_COMPETITIVO'
+  | 'CONCURSO'
+  | 'OUTROS'
+
+export type QualificationDocumentType =
+  | 'HABILITACAO_JURIDICA'
+  | 'REGULARIDADE_FISCAL_TRABALHISTA'
+  | 'QUALIFICACAO_TECNICA'
+  | 'QUALIFICACAO_ECONOMICO_FINANCEIRA'
+
+export type BidAnalysisRequest = {
+  bidReference: string
+  issuingBody: string
+  modality: BidModality
+  objectDescription: string
+  submissionDeadline: string
+  openingDate: string
+  budget: {
+    currency: string
+    estimatedValue: number
+    maxAcceptableValue?: number
+  }
+  technicalRequirements?: string[]
+  qualificationDocuments?: {
+    documentName: string
+    type: QualificationDocumentType
+    provided: boolean
+    remarks?: string
+  }[]
+  noticeSummary?: string
+}
+
+export type BidAnalysisResponse = {
+  bidReference: string
+  issuingBody: string
+  modality: string
+  submissionDeadline: string
+  openingDate: string
+  status: 'VIABLE' | 'REVIEW_REQUIRED' | 'HIGH_RISK'
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH'
+  issues: string[]
+  checklist: {
+    item: string
+    type: string
+    status: 'COMPLIANT' | 'PENDING' | 'MISSING'
+    observation: string
+  }[]
+  strategicRecommendations: string | null
+}
+
+export type CommercialStage = 'PROSPECTING' | 'DISCOVERY' | 'PROPOSAL' | 'NEGOTIATION' | 'CLOSING'
+
+export type CommercialAdviceRequest = {
+  opportunityReference: string
+  clientName: string
+  clientSegment: string
+  decisionMakers: string
+  productOffered: string
+  stage: CommercialStage
+  dealValue: { currency: string; amount: number }
+  painPoints: string[]
+  competitors?: string[]
+  objections?: {
+    category: string
+    description: string
+    currentAttempt?: string
+  }[]
+  notes?: string
+}
+
+export type CommercialAdviceResponse = {
+  opportunityReference: string
+  clientName: string
+  stage: string
+  status: 'READY' | 'REVIEW_REQUIRED'
+  issues: string[]
+  objectionStrategies: {
+    category: string
+    description: string
+    recommendedAngle: string
+  }[]
+  commercialStrategy: string
+}
+
 export class ApiError extends Error {
   readonly status: number
 
@@ -425,6 +514,18 @@ export const api = {
 
   planTrafficCampaign: (input: TrafficCampaignRequest) =>
     request<TrafficCampaignResponse>('/agents/traffic/campaign-plan', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+
+  analyzeBid: (input: BidAnalysisRequest) =>
+    request<BidAnalysisResponse>('/agents/bids/analyze', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+
+  adviseCommercial: (input: CommercialAdviceRequest) =>
+    request<CommercialAdviceResponse>('/agents/commercial/advise', {
       method: 'POST',
       body: JSON.stringify(input),
     }),

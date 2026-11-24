@@ -8,8 +8,8 @@ export const agents = [
   { id: 'reports', initials: 'RE', name: 'Agente de Relatórios e KPIs', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', available: true, desc: 'Consolide indicadores informados, compare com metas e identifique lacunas ou divergências.' },
   { id: 'traffic', initials: 'TR', name: 'Agente de Tráfego', dept: 'Marketing', category: 'Análise & Dados', status: 'Online', available: true, desc: 'Estruture um rascunho de campanha paga e calcule métricas a partir de dados informados.' },
   { id: 'lead', initials: 'LE', name: 'Agente de Prospecção e Qualificação de Leads', dept: 'Comercial', category: 'Vendas', status: 'Online', available: true, desc: 'Organize leads e avalie a aderência ao perfil ideal de cliente.' },
-  { id: 'tenders', initials: 'ED', name: 'Agente de Editais e Licitações', dept: 'Comercial', category: 'Vendas', status: 'Em breve', available: false, desc: 'Apoio à análise de editais e processos de licitação.' },
-  { id: 'commercial', initials: 'AC', name: 'Agente de Apoio Comercial', dept: 'Comercial', category: 'Vendas', status: 'Em breve', available: false, desc: 'Apoio em negociação e fechamento comercial.' },
+  { id: 'tenders', initials: 'ED', name: 'Agente de Editais e Licitações', dept: 'Comercial', category: 'Vendas', status: 'Online', available: true, desc: 'Analisa editais, prazos, riscos e o checklist de habilitação para apoiar a proposta.' },
+  { id: 'commercial', initials: 'AC', name: 'Agente de Apoio Comercial', dept: 'Comercial', category: 'Vendas', status: 'Online', available: true, desc: 'Apoia a estratégia de vendas, o diagnóstico de objeções e o direcionamento de fechamento.' },
 ]
 
 export const isMkt = (dept) => dept === 'Marketing'
