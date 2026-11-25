@@ -184,7 +184,7 @@ test('QA-002 - Cadastro envia os campos aceitos pela API', async ({ page }) => {
   await page.goto('/cadastro')
   await page.getByPlaceholder('Digite seu nome').fill('Ana')
   await page.getByPlaceholder('Digite seu sobrenome').fill('Souza')
-  await page.getByPlaceholder('000.000.000-00').fill('123.456.789-09')
+  await page.getByPlaceholder('000.000.000-00').fill('012.345.678-90')
   await page.getByPlaceholder('nome@incorp.com.br').fill('ana@example.com')
   await page.getByPlaceholder('Mínimo de 6 caracteres').fill('senha123')
   await page.getByPlaceholder('Repita sua senha').fill('senha123')
@@ -194,7 +194,7 @@ test('QA-002 - Cadastro envia os campos aceitos pela API', async ({ page }) => {
   expect(submitted).toEqual({
     name: 'Ana',
     surname: 'Souza',
-    cpf: 12345678909,
+    cpf: '01234567890',
     email: 'ana@example.com',
     password: 'senha123',
   })
