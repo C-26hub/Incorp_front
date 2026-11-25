@@ -621,3 +621,207 @@ test('QA-025 - Dashboard foi removido', async ({ page }) => {
 
   await expect(page).toHaveURL(/\/login$/)
 })
+
+test('QA-026 - Editais envia o edital e exibe checklist e parecer', async ({ page }) => {
+  let submitted
+  await comoDepartamento(page, 'Comercial')
+  await page.route('**/agents/bids/analyze', async (route) => {
+    submitted = route.request().postDataJSON()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        bidReference: 'PE-42/2026',
+        issuingBody: 'Ministério da Gestão e Inovação',
+        modality: 'PREGAO_ELETRONICO',
+        submissionDeadline: '2026-12-05',
+        openingDate: '2026-12-05',
+        status: 'REVIEW_REQUIRED',
+        riskLevel: 'MEDIUM',
+        issues: ['Um documento de habilitação ainda não foi providenciado.'],
+        checklist: [
+          {
+            item: 'Contrato Social consolidado',
+            type: 'HABILITACAO_JURIDICA',
+            status: 'COMPLIANT',
+            observation: 'Documento informado como providenciado.',
+          },
+          {
+            item: 'Balanço Patrimonial do último exercício',
+            type: 'QUALIFICACAO_ECONOMICO_FINANCEIRA',
+            status: 'PENDING',
+            observation: 'Pendente de assinatura contábil.',
+          },
+        ],
+        strategicRecommendations: 'Organize a documentação pendente antes de protocolar a proposta.',
+      }),
+    })
+  })
+
+  await page.goto('/home')
+  await page.getByRole('link', { name: /Agente de Editais e Licitações/ }).click()
+  await expect(page).toHaveURL(/\/agentes\/tenders$/)
+  await page.getByRole('link', { name: 'Voltar para agentes' }).click()
+  await expect(page).toHaveURL(/\/agentes$/)
+  await expect(page.getByText('3 agentes disponíveis para Comercial')).toBeVisible()
+  await page.getByText('Agente de Editais e Licitações').first().click()
+  await expect(page).toHaveURL(/\/agentes\/tenders$/)
+
+  await page.getByLabel('Identificador do edital *').fill('PE-42/2026')
+  await page.getByLabel('Órgão *').fill('Ministério da Gestão e Inovação')
+  await page.getByLabel('Modalidade *').selectOption('PREGAO_ELETRONICO')
+  await page.getByLabel('Objeto *').fill('Contratação de plataforma em nuvem para inteligência e automação de processos.')
+  await page.getByLabel('Prazo de envio *').fill('2026-12-05')
+  await page.getByLabel('Data de abertura *').fill('2026-12-05')
+  await page.getByLabel('Valor estimado *').fill('350000')
+  await page.getByLabel('Valor máximo aceitável').fill('400000')
+  await page.getByRole('button', { name: 'Adicionar requisito' }).click()
+  await page.getByLabel('Requisito técnico 1 *').fill('Atestado de capacidade técnica para sustentação de microsserviços em nuvem')
+  await page.getByRole('button', { name: 'Adicionar documento' }).click()
+  await page.getByLabel('Nome do documento 1 *').fill('Contrato Social consolidado')
+  await page.getByLabel('Tipo do documento 1 *').selectOption('HABILITACAO_JURIDICA')
+  await page.getByRole('checkbox', { name: 'Documento 1 já providenciado' }).check()
+  await page.getByRole('button', { name: 'Adicionar documento' }).click()
+  await page.getByLabel('Nome do documento 2 *').fill('Balanço Patrimonial do último exercício')
+  await page.getByLabel('Tipo do documento 2 *').selectOption('QUALIFICACAO_ECONOMICO_FINANCEIRA')
+  await page.getByLabel('Observação do documento 2').fill('Pendente de assinatura contábil')
+  await page.getByLabel('Resumo do edital').fill('Pregão com critério de julgamento menor preço por item.')
+  await page.getByRole('button', { name: 'Analisar edital' }).click()
+
+  await expect(page.getByText('Revisão necessária', { exact: true })).toBeVisible()
+  await expect(page.getByText('Risco Médio', { exact: true })).toBeVisible()
+  await expect(page.getByText('Um documento de habilitação ainda não foi providenciado.')).toBeVisible()
+  await expect(page.getByText('Conforme', { exact: true })).toBeVisible()
+  await expect(page.getByText('Pendente', { exact: true })).toBeVisible()
+  await expect(page.getByText('Organize a documentação pendente antes de protocolar a proposta.')).toBeVisible()
+  expect(submitted).toEqual({
+    bidReference: 'PE-42/2026',
+    issuingBody: 'Ministério da Gestão e Inovação',
+    modality: 'PREGAO_ELETRONICO',
+    objectDescription: 'Contratação de plataforma em nuvem para inteligência e automação de processos.',
+    submissionDeadline: '2026-12-05',
+    openingDate: '2026-12-05',
+    budget: { currency: 'BRL', estimatedValue: 350000, maxAcceptableValue: 400000 },
+    technicalRequirements: ['Atestado de capacidade técnica para sustentação de microsserviços em nuvem'],
+    qualificationDocuments: [
+      { documentName: 'Contrato Social consolidado', type: 'HABILITACAO_JURIDICA', provided: true },
+      {
+        documentName: 'Balanço Patrimonial do último exercício',
+        type: 'QUALIFICACAO_ECONOMICO_FINANCEIRA',
+        provided: false,
+        remarks: 'Pendente de assinatura contábil',
+      },
+    ],
+    noticeSummary: 'Pregão com critério de julgamento menor preço por item.',
+  })
+})
+
+test('QA-027 - Apoio Comercial envia a oportunidade e exibe a estratégia', async ({ page }) => {
+  let submitted
+  await comoDepartamento(page, 'Comercial')
+  await page.route('**/agents/commercial/advise', async (route) => {
+    submitted = route.request().postDataJSON()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        opportunityReference: 'OPP-2026-089',
+        clientName: 'Grupo Varejo Brasil',
+        stage: 'NEGOTIATION',
+        status: 'REVIEW_REQUIRED',
+        issues: ['Há objeções que ainda precisam de alinhamento antes do avanço.'],
+        objectionStrategies: [{
+          category: 'Preço',
+          description: 'Cliente alega que o setup está 20% acima do orçamento previsto para este ano.',
+          recommendedAngle: 'Compare o custo do setup com o ganho de conversão no mobile.',
+        }],
+        commercialStrategy: 'Apresente o piloto como validação do CFO e destaque a integração com o ERP.',
+      }),
+    })
+  })
+
+  await page.goto('/home')
+  await page.getByRole('link', { name: /Agente de Apoio Comercial/ }).click()
+  await expect(page).toHaveURL(/\/agentes\/commercial$/)
+  await page.getByRole('link', { name: 'Voltar para agentes' }).click()
+  await expect(page).toHaveURL(/\/agentes$/)
+  await page.getByText('Agente de Apoio Comercial').first().click()
+  await expect(page).toHaveURL(/\/agentes\/commercial$/)
+
+  await page.getByLabel('Referência da oportunidade *').fill('OPP-2026-089')
+  await page.getByLabel('Cliente *').fill('Grupo Varejo Brasil')
+  await page.getByLabel('Segmento *').fill('Varejo Omnichannel')
+  await page.getByLabel('Decisores *').fill('Diretora de E-commerce e Gerente de TI')
+  await page.getByLabel('Produto oferecido *').fill('Plataforma de Personalização de Vitrines')
+  await page.getByLabel('Estágio *').selectOption('NEGOTIATION')
+  await page.getByLabel('Valor da oportunidade *').fill('85000')
+  await page.getByLabel('Dor 1 *').fill('Taxa de conversão estagnada no mobile')
+  await page.getByRole('button', { name: 'Adicionar dor' }).click()
+  await page.getByLabel('Dor 2 *').fill('Dificuldade de integrar catálogo com o ERP legado')
+  await page.getByRole('button', { name: 'Adicionar concorrente' }).click()
+  await page.getByLabel('Concorrente 1 *').fill('Concorrente Alfa')
+  await page.getByRole('button', { name: 'Adicionar concorrente' }).click()
+  await page.getByLabel('Concorrente 2 *').fill('Solução interna legada')
+  await page.getByRole('button', { name: 'Adicionar objeção' }).click()
+  await page.getByLabel('Categoria da objeção 1 *').fill('Preço')
+  await page.getByLabel('Descrição da objeção 1 *').fill('Cliente alega que o setup está 20% acima do orçamento previsto para este ano.')
+  await page.getByLabel('Tentativa atual 1').fill('Oferecemos parcelamento do setup em 3 vezes.')
+  await page.getByLabel('Observações').fill('Cliente demonstrou alto interesse no piloto mas necessita de validação do CFO.')
+  await page.getByRole('button', { name: 'Gerar direcionamento' }).click()
+
+  await expect(page.getByText('Revisão necessária', { exact: true })).toBeVisible()
+  await expect(page.getByText('Há objeções que ainda precisam de alinhamento antes do avanço.')).toBeVisible()
+  await expect(page.getByText('Compare o custo do setup com o ganho de conversão no mobile.')).toBeVisible()
+  await expect(page.getByText('Apresente o piloto como validação do CFO e destaque a integração com o ERP.')).toBeVisible()
+  expect(submitted).toEqual({
+    opportunityReference: 'OPP-2026-089',
+    clientName: 'Grupo Varejo Brasil',
+    clientSegment: 'Varejo Omnichannel',
+    decisionMakers: 'Diretora de E-commerce e Gerente de TI',
+    productOffered: 'Plataforma de Personalização de Vitrines',
+    stage: 'NEGOTIATION',
+    dealValue: { currency: 'BRL', amount: 85000 },
+    painPoints: [
+      'Taxa de conversão estagnada no mobile',
+      'Dificuldade de integrar catálogo com o ERP legado',
+    ],
+    competitors: ['Concorrente Alfa', 'Solução interna legada'],
+    objections: [{
+      category: 'Preço',
+      description: 'Cliente alega que o setup está 20% acima do orçamento previsto para este ano.',
+      currentAttempt: 'Oferecemos parcelamento do setup em 3 vezes.',
+    }],
+    notes: 'Cliente demonstrou alto interesse no piloto mas necessita de validação do CFO.',
+  })
+})
+
+test('QA-028 - Usuário de Marketing não abre editais nem apoio comercial pela URL', async ({ page }) => {
+  await page.goto('/agentes/tenders')
+  await expect(page).toHaveURL(/\/agentes$/)
+  await expect(page.getByText('Agente de Editais e Licitações')).toHaveCount(0)
+
+  await page.goto('/agentes/commercial')
+  await expect(page).toHaveURL(/\/agentes$/)
+  await expect(page.getByText('Agente de Apoio Comercial')).toHaveCount(0)
+})
+
+test('QA-029 - Edital não envia prazo posterior à data de abertura', async ({ page }) => {
+  let requestSent = false
+  await comoDepartamento(page, 'Comercial')
+  await page.route('**/agents/bids/analyze', async (route) => {
+    requestSent = true
+    await route.fulfill({ status: 500, body: 'Unexpected request' })
+  })
+
+  await page.goto('/agentes/tenders')
+  await page.getByLabel('Identificador do edital *').fill('PE-42/2026')
+  await page.getByLabel('Órgão *').fill('Ministério da Gestão e Inovação')
+  await page.getByLabel('Objeto *').fill('Contratação de plataforma em nuvem.')
+  await page.getByLabel('Prazo de envio *').fill('2026-12-06')
+  await page.getByLabel('Data de abertura *').fill('2026-12-05')
+  await page.getByLabel('Valor estimado *').fill('350000')
+  await page.getByRole('button', { name: 'Analisar edital' }).click()
+
+  await expect(page.getByRole('alert')).toHaveText('O prazo de envio de propostas não pode ser posterior à data de abertura.')
+  expect(requestSent).toBe(false)
+})

@@ -13,6 +13,8 @@ import SeoWorkspace from './pages/SeoWorkspace'
 import SocialWorkspace from './pages/SocialWorkspace'
 import ReportsWorkspace from './pages/ReportsWorkspace'
 import TrafficWorkspace from './pages/TrafficWorkspace'
+import BidsWorkspace from './pages/BidsWorkspace'
+import CommercialWorkspace from './pages/CommercialWorkspace'
 import History from './pages/History'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
@@ -21,6 +23,16 @@ import Users from './pages/Users'
 function CommercialLeadsRoute() {
   const { profile } = useProfile()
   return profile.dept === 'Comercial' ? <LeadsWorkspace /> : <Navigate to="/agentes" replace />
+}
+
+function CommercialBidsRoute() {
+  const { profile } = useProfile()
+  return profile.dept === 'Comercial' ? <BidsWorkspace /> : <Navigate to="/agentes" replace />
+}
+
+function CommercialSupportRoute() {
+  const { profile } = useProfile()
+  return profile.dept === 'Comercial' ? <CommercialWorkspace /> : <Navigate to="/agentes" replace />
 }
 
 function AdministratorRoute() {
@@ -43,6 +55,8 @@ export default function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/agentes" element={<Agents />} />
                 <Route path="/agentes/lead" element={<CommercialLeadsRoute />} />
+                <Route path="/agentes/tenders" element={<CommercialBidsRoute />} />
+                <Route path="/agentes/commercial" element={<CommercialSupportRoute />} />
                 <Route path="/agentes/seo" element={<SeoWorkspace />} />
                 <Route path="/agentes/social" element={<SocialWorkspace />} />
                 <Route path="/agentes/reports" element={<ReportsWorkspace />} />
